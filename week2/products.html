@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>產品｜第二週 - RESTful API 串接</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+</head>
+<style>
+    .card .img-box {
+        height: 350px;
+    }
+
+    .card .img-box img {
+        height: 110%;
+    }
+
+    .img-box-sm {
+        width: 75px;
+        height: 75px;
+    }
+
+    .img-box-sm+.img-box-sm {
+        margin-left: 0.5rem;
+    }
+
+    .card .img-box,
+    .img-box-sm {
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
+
+<body>
+    <div id="app">
+        <div class="container py-5">
+            <div class="row">
+                <div class="col-lg-7">
+                    <h1 class="h4 fw-bold">產品列表</h1>
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr class="text-center">
+                                <th scope="col">產品名稱</th>
+                                <th scope="col">原價</th>
+                                <th scope="col">售價</th>
+                                <th scope="col">是否啟用</th>
+                                <th scope="col">查看細節</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="product in products" :key="index">
+                                <th scope="row">{{ product.title }}</th>
+                                <td class="text-end">${{ product.origin_price }}</td>
+                                <td class="text-end">${{ product.price }}</td>
+                                <td class="text-center" :class="{ 'text-success': product.is_enabled }">{{
+                                    product.is_enabled ?
+                                    '啟用' : '停用' }}
+                                </td>
+                                <td class="text-center"><button type="button" class="btn btn-outline-primary btn-sm"
+                                        @click="updateProduct(product)"
+                                        :disabled="product.id === currentProduct.id">詳細內容</button></td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="5" class="border-0">目前有 {{ products.length }} 項產品</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="col-lg-5">
+                    <h1 class="h4 fw-bold">單一產品細節</h1>
+                    <div v-if="!currentProduct.id" class="bg-light p-3 text-center text-muted fs-5">請選擇一個商品查看
+                    </div>
+                    <div class="card" v-else>
+                        <div class="row g-0">
+                            <div class="col-md-5 img-box rounded-start">
+                                <img :src="currentProduct.imageUrl"
+                                    :alt="`${currentProduct.category} - ${currentProduct.title}`">
+                            </div>
+                            <div class="col-md-7">
+                                <div class="p-4 h-100 d-flex flex-column">
+                                    <small class="text-muted">{{ currentProduct.category }}</small>
+                                    <h5 class="card-title fw-bold mb-0 h4">{{ currentProduct.title }}</h5>
+                                    <p class="card-text text-muted">{{ currentProduct.description }}</p>
+                                    <ul class="list-unstyled">
+                                        <li>{{ currentProduct.content }}</li>
+                                        <li class="mt-2"><strong class="text-danger fs-2">${{ currentProduct.price
+                                                }}</strong><del class="text-muted ms-1">${{
+                                                currentProduct.origin_price }}</del></li>
+                                    </ul>
+                                    <ul class="list-unstyled d-flex align-items-center mb-0 mt-auto">
+                                        <li v-for="(image, index) in currentProduct.imagesUrl" :key="index"
+                                            class="img-box-sm bg-light border border-dark border-3">
+                                            <img :src="image" class="img-fluid"
+                                                :alt="`${currentProduct.category} - ${image} - ${index + 1}`">
+                                        </li>
+                                        <li></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    const { createApp } = Vue;
+    const url = 'https://vue3-course-api.hexschool.io/v2'; // 請加入站點
+    const path = 'ella-diving'; // 請加入個人 API Path
+    const app = {
+        data() {
+            return {
+                products: [],
+                currentProduct: {}
+            }
+        },
+        created() {
+            const token = document.cookie.replace(/(?:(?:^|.*;\s*)ella-diving-token\s*\=\s*([^;]*).*$)|^.*$/, '$1');
+
+            if (token) {
+                axios.defaults.headers.common['Authorization'] = token;
+                this.getProducts();
+            } else {
+                location.href = './login.html';
+            }
+        },
+        methods: {
+            getProducts() {
+                axios.get(`${url}/api/${path}/admin/products`)
+                    .then(res => {
+                        this.products = res.data.products;
+                    })
+                    .catch(error => {
+                        console.dir(error);
+                        alert(error.response.data.message);
+                    });
+            },
+            updateProduct(product) {
+                this.currentProduct = product;
+            }
+        },
+    };
+
+    createApp(app).mount('#app');
+</script>
+
+</html>

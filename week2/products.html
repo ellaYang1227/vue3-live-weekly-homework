@@ -13,20 +13,18 @@
 </head>
 <style>
     .card .img-box {
-        height: 350px;
+        min-height: 350px;
+        height: 100%;
     }
 
     .card .img-box img {
         height: 110%;
+        overflow: hidden;
     }
 
     .img-box-sm {
         width: 75px;
         height: 75px;
-    }
-
-    .img-box-sm+.img-box-sm {
-        margin-left: 0.5rem;
     }
 
     .card .img-box,
@@ -81,9 +79,11 @@
                     </div>
                     <div class="card" v-else>
                         <div class="row g-0">
-                            <div class="col-md-5 img-box rounded-start">
-                                <img :src="currentProduct.imageUrl"
-                                    :alt="`${currentProduct.category} - ${currentProduct.title}`">
+                            <div class="col-md-5 align-self-stretch">
+                                <div class="img-box rounded-start">
+                                    <img :src="currentProduct.imageUrl"
+                                        :alt="`${currentProduct.category} - ${currentProduct.title}`">
+                                </div>
                             </div>
                             <div class="col-md-7">
                                 <div class="p-4 h-100 d-flex flex-column">
@@ -96,9 +96,9 @@
                                                 }}</strong><del class="text-muted ms-1">${{
                                                 currentProduct.origin_price }}</del></li>
                                     </ul>
-                                    <ul class="list-unstyled d-flex align-items-center mb-0 mt-auto">
+                                    <ul class="list-unstyled d-flex align-items-center flex-wrap mb-0 mt-auto">
                                         <li v-for="(image, index) in currentProduct.imagesUrl" :key="index"
-                                            class="img-box-sm bg-light border border-dark border-3">
+                                            class="img-box-sm bg-light border border-dark border-3 mx-1 mt-2">
                                             <img :src="image" class="img-fluid"
                                                 :alt="`${currentProduct.category} - ${image} - ${index + 1}`">
                                         </li>

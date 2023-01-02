@@ -90,8 +90,6 @@
         methods: {
             signin() {
                 const user = { username: this.username, password: this.password };
-
-                console.log(user)
                 axios.post(`${url}/admin/signin`, user)
                     .then(res => {
                         const { token, expired, message } = res.data;
@@ -100,9 +98,17 @@
                     })
                     .catch(error => {
                         console.dir(error);
+                        const errMsg = error.response.data.error.message;
+                        let err = '';
+                        if (errMsg.match('user may have been deleted')) {
+                            err = '找不到此用戶'
+                        } else if (errMsg.match('password')) {
+                            err = '密碼錯誤'
+                        }
                         swalWithBootstrapButtons.fire({
                             icon: 'error',
                             title: error.response.data.message,
+                            text: err,
                             showConfirmButton: false,
                             showCancelButton: true,
                             cancelButtonText: '關閉',

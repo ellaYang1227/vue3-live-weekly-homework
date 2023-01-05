@@ -49,10 +49,9 @@
         </div>
     </div>
 </body>
-<script>
+<script type="module">
+    import { url, path } from '../data.js';
     const { createApp } = Vue;
-    const url = 'https://vue3-course-api.hexschool.io/v2'; // 請加入站點
-    const path = 'ella-diving'; // 請加入個人 API Path
     const swalWithBootstrapButtons = Swal.mixin({
         customClass: {
             confirmButton: 'btn btn-primary',
@@ -78,11 +77,11 @@
             if (token) { this.goToProducts() }
         },
         watch: {
-            username: function () {
+            username() {
                 const regex = /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4})*$/;
                 this.isInputErr.username = !regex.test(this.username);
             },
-            password: function () {
+            password() {
                 const regex = /^(?=.*[0-9])(?=.*[a-zA-Z]).{8,}$/;
                 this.isInputErr.password = !regex.test(this.password);
             }

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登入｜第三週 - 熟練 Vue.js</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+    <div class="vh-100 d-flex flex-column justify-content-center align-items-center" id="app">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-xl-4">
+                    <div class="card">
+                        <div class="card-body py-4">
+                            <h5 class="card-title h4 mb-3 text-muted">{{ title }}</h5>
+                            <div class="mb-3">
+                                <label for="usernameInput" class="form-label">Email 帳號<font class="text-danger">*</font>
+                                </label>
+                                <input type="email" class="form-control" id="usernameInput" v-model.trim="username"
+                                    required :class="{ 'is-invalid': isInputErr.username }">
+                                <div class="invalid-feedback" :class="{ 'd-block': isInputErr.username }">必填欄位，須符合
+                                    Email 格式</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="passwordInput" class="form-label">密碼<font class="text-danger">*</font>
+                                </label>
+                                <input type="password" class="form-control" id="passwordInput" v-model.trim="password"
+                                    required :class="{ 'is-invalid': isInputErr.password }">
+                                <div class="invalid-feedback d-block" :class="{ 'text-muted': !isInputErr.password }">
+                                    <template v-if="!isInputErr.username">密碼需至少 8 碼以上，並英數混合</template>
+                                    <template v-else>必填欄位，密碼需至少 8 碼以上，並英數混合</template>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 mt-3" @click="signin"
+                                :disabled="!username || !password || isInputErr.username || isInputErr.password">{{
+                                title }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="module">
+    import { url, path } from '../data.js';
+    const { createApp } = Vue;
+    const swalWithBootstrapButtons = Swal.mixin({
+        customClass: {
+            confirmButton: 'btn btn-primary',
+            cancelButton: 'btn btn-outline-secondary'
+        },
+        buttonsStyling: false
+    });
+
+    const app = {
+        data() {
+            return {
+                title: '登入',
+                username: '',
+                password: '',
+                isInputErr: {
+                    username: null,
+                    password: null
+                }
+            }
+        },
+        created() {
+            const token = document.cookie.replace(/(?:(?:^|.*;\s*)ella-diving-token\s*\=\s*([^;]*).*$)|^.*$/, '$1');
+            if (token) { this.goToProducts() }
+        },
+        watch: {
+            username() {
+                const regex = /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4})*$/;
+                this.isInputErr.username = !regex.test(this.username);
+            },
+            password() {
+                const regex = /^(?=.*[0-9])(?=.*[a-zA-Z]).{8,}$/;
+                this.isInputErr.password = !regex.test(this.password);
+            }
+        },
+        methods: {
+            signin() {
+                const user = { username: this.username, password: this.password };
+                axios.post(`${url}/admin/signin`, user)
+                    .then(res => {
+                        const { token, expired, message } = res.data;
+                        document.cookie = `${path}-token=${token}; expires=${new Date(expired)}`;
+                        this.goToProducts();
+                    })
+                    .catch(error => {
+                        console.dir(error);
+                        const errMsg = error.response.data.error.message;
+                        let err = '';
+                        if (errMsg.match('user may have been deleted')) {
+                            err = '找不到此用戶'
+                        } else if (errMsg.match('password')) {
+                            err = '密碼錯誤'
+                        }
+                        swalWithBootstrapButtons.fire({
+                            icon: 'error',
+                            title: error.response.data.message,
+                            text: err,
+                            showConfirmButton: false,
+                            showCancelButton: true,
+                            cancelButtonText: '關閉',
+                            timer: 3000,
+                            timerProgressBar: true
+                        });
+                    });
+            },
+            goToProducts() {
+                location.href = './products.html';
+            }
+        },
+    };
+
+    createApp(app).mount('#app');
+</script>
+
+</html>

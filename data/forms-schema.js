@@ -6,7 +6,7 @@ export const formsSchema = {
         error: '必填欄位，須符合 Email 格式',
         validates: {
             isRequired: true,
-            pattern: '^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4})*$'
+            pattern: '^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,4})*$'
         }
     },
     password: {
@@ -24,10 +24,10 @@ export const formsSchema = {
         formType: 'input',
         name: '產品名稱',
         type: 'text',
-        error: '必填欄位，最多 25 個字',
+        error: '必填欄位，最多 30 個字',
         validates: {
             isRequired: true,
-            maxlength: 25
+            maxlength: 30
         }
     },
     product_category: {
@@ -92,7 +92,7 @@ export const formsSchema = {
         error: '必填欄位，須符合 url 格式',
         validates: {
             isRequired: true,
-            pattern: '^(?:(https):\/\/)?((?:[a-zA-Z0-9.\-]+\.)+(?:[a-zA-Z0-9]{2,4}))((?:/[\w+=%&.~\-]*)*)\??([\w+=%&.~\-]*)$'
+            pattern: '^(https://)[^s]+'
         }
     },
     product_imagesUrl: {
@@ -106,7 +106,7 @@ export const formsSchema = {
     product_is_enabled: {
         formType: 'radio',
         name: '是否啟用',
-        options: { 
+        options: {
             1: '啟用',
             0: '停用'
         },
@@ -114,4 +114,4 @@ export const formsSchema = {
             isRequired: true
         }
     }
-}
+};

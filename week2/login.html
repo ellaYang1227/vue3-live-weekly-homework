@@ -22,21 +22,25 @@
                         <div class="card-body py-4">
                             <h5 class="card-title h4 mb-3 text-muted">{{ title }}</h5>
                             <div class="mb-3">
-                                <label for="usernameInput" class="form-label">Email 帳號<font class="text-danger">*</font>
+                                <label for="usernameInput" class="form-label">{{ formsSchema.username.name }}<font
+                                        class="text-danger" v-if="formsSchema.username.validates.isRequired">*</font>
                                 </label>
-                                <input type="email" class="form-control" id="usernameInput" v-model.trim="username"
-                                    required :class="{ 'is-invalid': isInputErr.username }">
-                                <div class="invalid-feedback" :class="{ 'd-block': isInputErr.username }">必填欄位，須符合
-                                    Email 格式</div>
+                                <input :type="formsSchema.username.type" class="form-control" id="usernameInput"
+                                    v-model.trim="username" :required="formsSchema.username.validates.isRequired"
+                                    :class="{ 'is-invalid': isInputErr.username }">
+                                <div class="invalid-feedback" :class="{ 'd-block': isInputErr.username }">{{
+                                    formsSchema.username.error }}</div>
                             </div>
                             <div class="mb-3">
-                                <label for="passwordInput" class="form-label">密碼<font class="text-danger">*</font>
+                                <label for="passwordInput" class="form-label">{{ formsSchema.password.name }}<font
+                                        class="text-danger" v-if="formsSchema.password.validates.isRequired">*</font>
                                 </label>
-                                <input type="password" class="form-control" id="passwordInput" v-model.trim="password"
-                                    required :class="{ 'is-invalid': isInputErr.password }">
+                                <input :type="formsSchema.password.type" class="form-control" id="passwordInput"
+                                    v-model.trim="password" :required="formsSchema.password.validates.isRequired"
+                                    :class="{ 'is-invalid': isInputErr.password }">
                                 <div class="invalid-feedback d-block" :class="{ 'text-muted': !isInputErr.password }">
-                                    <template v-if="!isInputErr.username">密碼需至少 8 碼以上，並英數混合</template>
-                                    <template v-else>必填欄位，密碼需至少 8 碼以上，並英數混合</template>
+                                    <template v-if="!isInputErr.username">{{ formsSchema.password.help }}</template>
+                                    <template v-else>{{ formsSchema.password.error }}</template>
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary w-100 mt-3" @click="signin"
@@ -50,7 +54,8 @@
     </div>
 </body>
 <script type="module">
-    import { url, path } from '../data.js';
+    import { url, path } from '../data/data.js';
+    import { formsSchema } from '../data/forms-schema.js';
     const { createApp } = Vue;
     const swalWithBootstrapButtons = Swal.mixin({
         customClass: {
@@ -63,6 +68,7 @@
     const app = {
         data() {
             return {
+                formsSchema,
                 title: '登入',
                 username: '',
                 password: '',
@@ -78,11 +84,11 @@
         },
         watch: {
             username() {
-                const regex = /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4})*$/;
+                const regex = formsSchema.username.validates.pattern;
                 this.isInputErr.username = !regex.test(this.username);
             },
             password() {
-                const regex = /^(?=.*[0-9])(?=.*[a-zA-Z]).{8,}$/;
+                const regex = formsSchema.password.validates.pattern;
                 this.isInputErr.password = !regex.test(this.password);
             }
         },

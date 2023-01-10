@@ -33,6 +33,14 @@
         height: 110%;
         overflow: hidden;
     }
+
+    .table {
+        table-layout: fixed;
+    }
+
+    .table-responsive thead th {
+        word-break: keep-all;
+    }
 </style>
 
 <body>
@@ -46,12 +54,12 @@
                 <table class="table table-striped table-hover text-center align-middle">
                     <thead>
                         <tr>
-                            <th scope="col">產品名稱</th>
-                            <th scope="col">分類</th>
-                            <th scope="col">原價</th>
-                            <th scope="col">售價</th>
-                            <th scope="col">是否啟用</th>
-                            <th scope="col"></th>
+                            <th scope="col" width="200px">產品名稱</th>
+                            <th scope="col" width="120px">分類</th>
+                            <th scope="col" width="120px">原價</th>
+                            <th scope="col" width="120px">售價</th>
+                            <th scope="col" width="120px">是否啟用</th>
+                            <th scope="col" width="150px">功能</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -64,11 +72,13 @@
                                     <h4 class="h6 mb-0 text-truncate fw-bold">{{ product.title }}</h4>
                                 </div>
                             </th>
-                            <td scope="row">{{ product.category }}</td>
+                            <td scope="row" class="text-truncate">{{ product.category }}</td>
                             <td class="text-end">${{ product.origin_price }}</td>
                             <td class="text-end">${{ product.price }}</td>
-                            <td :class="[product.is_enabled ? 'text-success' : 'text-muted']">{{
-                                formsSchema.product_is_enabled.options[product.is_enabled] }}</td>
+                            <td>
+                                <strong :class="[product.is_enabled ? 'text-success' : 'text-danger']">{{
+                                    getIs_enabledLabelName(product.is_enabled) }}</strong>
+                            </td>
                             <td>
                                 <button type="button" class="btn btn-outline-primary btn-sm"
                                     @click="openModal('edit', product)">編輯</button>
@@ -99,7 +109,7 @@
                         <form>
                             <fieldset :disabled="isLoading">
                                 <div class="row g-3 pb-3">
-                                    <div class="col-md-6">
+                                    <div class="col-12">
                                         <label for="inputTitle" class="form-label d-flex align-items-center">{{
                                             formsSchema.product_title.name }}
                                             <font class="text-danger"
@@ -161,11 +171,14 @@
                                     </div>
                                 </div>
                                 <div class="row g-3 pb-3">
-                                    <label for="inputImagesUrl" class="form-label">{{
+                                    <label for="inputImagesUrl" class="form-label d-flex align-items-center">{{
                                         formsSchema.product_imagesUrl.name
                                         }}<font class="text-danger"
                                             v-if="formsSchema.product_imagesUrl.validates.isRequired">*
                                         </font>
+                                        <button type="button" class="btn btn-link p-0 ms-auto"
+                                            @click="updateImagesUrl('add')" v-if="currentProduct?.imagesUrl"
+                                            :disabled="Object.keys(currentProduct.imagesUrl).length >= 5">新增</button>
                                     </label>
                                     <div class="col-md-2 mt-0 text-center"
                                         v-for="(imageUrl, key, index) in currentProduct.imagesUrl" :key="key">
@@ -187,10 +200,6 @@
                                                 :class="{ 'is-invalid': isInputErr?.imagesUrl[key] }">
                                             <div
                                                 class="d-grid gap-0 d-md-flex justify-content-md-end flex-shrink-0 ms-md-2">
-                                                <button type="button" class="btn btn-link btn-sm"
-                                                    @click="updateImagesUrl('add')"
-                                                    v-if="5 > Object.keys(currentProduct.imagesUrl).length && (index + 1) === Object.keys(currentProduct.imagesUrl).length"
-                                                    :disabled="Object.keys(currentProduct.imagesUrl).length >= 5">新增</button>
                                                 <button type="button" class="btn btn-link btn-sm text-danger"
                                                     @click="updateImagesUrl('del', key)"
                                                     v-if="Object.keys(currentProduct.imagesUrl).length > 1">刪除</button>
@@ -228,8 +237,6 @@
                                         <div class="invalid-feedback" :class="{ 'd-block': isInputErr?.content }">{{
                                             formsSchema.product_content.error }}</div>
                                     </div>
-                                </div>
-                                <div class="row g-3 pb-3">
                                     <div class="col-md-4">
                                         <label for="inputUnit" class="form-label">{{ formsSchema.product_unit.name
                                             }}<font class="text-danger"
@@ -291,13 +298,13 @@
                                                 v-if="formsSchema.product_is_enabled.validates.isRequired">*</font>
                                         </label>
                                         <div class="form-check form-check-inline"
-                                            v-for="(option, key) in formsSchema.product_is_enabled.options"
-                                            :key="option">
-                                            <input class="form-check-input" :value="key" type="radio"
-                                                name="is_enabledRadio" :id="`is_enabledRadio-${key}`"
+                                            v-for="(option, index) in formsSchema.product_is_enabled.options"
+                                            :key="option.value">
+                                            <input class="form-check-input" :value="option.value" type="radio"
+                                                name="is_enabledRadio" :id="`is_enabledRadio-${index}`"
                                                 v-model="currentProduct.is_enabled">
-                                            <label class="form-check-label" :for="`is_enabledRadio-${key}`">
-                                                {{ option }}
+                                            <label class="form-check-label" :for="`is_enabledRadio-${index}`">
+                                                {{ option.label }}
                                             </label>
                                         </div>
                                     </div>
@@ -306,12 +313,11 @@
                         </form>
                     </div>
                     <div class="modal-footer">
-                        是否修改{{ isInputChangeValue ? 'Y' : 'N'}}
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                             :disabled="isLoading">取消</button>
                         <button type="submit" class="btn btn-primary"
                             :disabled="isLoading || !isInputChangeValue || inputHasErr"
-                            @click="currentProduct?.id ? editProduct(currentProduct.id) : addProduct">
+                            @click="addOrEditProduct(currentProduct?.id)">
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
                                 v-if="isLoading"></span>
                             {{ currentProduct?.id ? '修改' : '新增' }}</button>
@@ -353,10 +359,12 @@
         crossorigin="anonymous"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 <script type="module">
     import { url, path } from '../data/data.js';
     import { formsSchema } from '../data/forms-schema.js';
+    import { swalWithBootstrapButtons } from '../data/sweetalert2.js';
     const { createApp } = Vue;
 
     let productModal = null;
@@ -368,17 +376,7 @@
                 formsSchema,
                 products: {},
                 initCurrentProduct: {},
-                currentProduct: {
-                    title: '',
-                    category: '',
-                    origin_price: null,
-                    price: null,
-                    unit: '',
-                    description: '',
-                    content: '',
-                    imageUrl: '',
-                    imagesUrl: null
-                },
+                currentProduct: {},
                 isLoading: false,
                 isInputErr: {},
                 inputHasErr: false,
@@ -386,6 +384,7 @@
             }
         },
         mounted() {
+            this.defaultCurrentProduct();
             this.checkUser();
             productModal = this.createModal('productModal');
             delProductModal = this.createModal('delProductModal');
@@ -416,29 +415,47 @@
 
                             }
                         } else {
-                            this.isInputErr[key] = this.currentProduct[key] ? false : true;
+                            this.isInputErr[key] = this.currentProduct[key] || key === 'is_enabled' && this.currentProduct[key] === 0 ? false : true;
                         }
-
-                        // 是否修改
-                        // if (key === 'imagesUrl') {
-                        //     const imagesUrlKeys = Object.keys(this.initCurrentProduct.imagesUrl);
-                        //     this.isInputChangeValue = imagesUrlKeys.some(imagesUrlKey => this.initCurrentProduct.imagesUrl[imagesUrlKey] !== this.currentProduct.imagesUrl[imagesUrlKey]);
-                        // } else {
-                        //     console.log(this.currentProduct[key])
-                        //     console.log(this.initCurrentProduct[key])
-                        //     console.log(this.currentProduct.imageUrl !== this.initCurrentProduct.imageUrl)
-                        //     console.error('錯誤')
-                        //     if (this.currentProduct[key] !== this.initCurrentProduct[key]) { this.isInputChangeValue = true }
-                        // }
                     });
 
-                    this.isInputChangeValue = this.getIsInputChangeValue();
-                    this.inputHasErr = this.getInputHasErr();
+                    // Input 值是否修改
+                    this.getIsInputChangeValue();
+                },
+                deep: true
+            },
+            isInputErr: {
+                handler() {
+                    const values = Object.values(this.isInputErr);
+                    this.inputHasErr = values.some(value => {
+                        if (typeof value === 'object') {
+                            return Object.values(value).some(childValue => childValue);
+                        } else {
+                            return value;
+                        }
+                    });
                 },
                 deep: true
             }
         },
         methods: {
+            defaultCurrentProduct() {
+                const timestamp = this.timestamp();
+                this.currentProduct = {
+                    title: '',
+                    category: '',
+                    origin_price: null,
+                    price: null,
+                    unit: '',
+                    description: '',
+                    content: '',
+                    imageUrl: '',
+                    imagesUrl: {
+                        [timestamp]: ''
+                    },
+                    is_enabled: 1
+                };
+            },
             checkUser() {
                 const token = document.cookie.replace(/(?:(?:^|.*;\s*)ella-diving-token\s*\=\s*([^;]*).*$)|^.*$/, '$1');
                 axios.defaults.headers.common['Authorization'] = token;
@@ -455,44 +472,48 @@
                 axios.get(`${url}/api/${path}/admin/products/all`)
                     .then(res => {
                         this.products = res.data.products;
-                        console.log(this.products)
                     })
                     .catch(error => {
                         console.dir(error);
-                        alert(error.response.data.message);
+                        swalWithBootstrapButtons.fire({
+                            icon: 'error',
+                            title: error.response.data.message
+                        });
                     });
             },
-            addProduct() {
-                console.log("111")
-            },
-            editProduct(id) {
-                console.log(id)
+            addOrEditProduct(id) {
                 this.isLoading = true;
-                this.currentProduct.imagesUrl = Object.values(this.currentProduct.imagesUrl);
-                console.log(this.currentProduct)
-                axios.put(`${url}/api/${path}/admin/product/${id}`, { data: this.currentProduct })
-                    .then(res => {
-                        this.getProducts();
-                        productModal.hide();
-                        alert(res.data.message);
-                    })
-                    .catch(error => {
-                        console.dir(error);
-                        alert(error.response.data.message);
-                    });
+                this.currentProduct.imagesUrl = Object.values(this.currentProduct.imagesUrl).filter(value => value);
+                const data = { data: this.currentProduct };
+                if (!id) {
+                    axios.post(`${url}/api/${path}/admin/product`, data)
+                        .then(res => {
+                            this.closeModal('add', 'success', res.data.message);
+                        })
+                        .catch(error => {
+                            console.dir(error);
+                            this.closeModal('add', 'error', error.response.data.message);
+                        });
+                } else {
+                    axios.put(`${url}/api/${path}/admin/product/${id}`, data)
+                        .then(res => {
+                            this.closeModal('edit', 'success', res.data.message);
+                        })
+                        .catch(error => {
+                            console.dir(error);
+                            this.closeModal('edit', 'error', error.response.data.message);
+                        });
+                }
             },
             delProduct(id) {
                 this.isLoading = true;
                 axios.delete(`${url}/api/${path}/admin/product/${id}`)
                     .then(res => {
-                        this.isLoading = false;
-                        delProductModal.hide();
-                        this.getProducts();
-                        alert(res.data.message);
+                        this.closeModal('del', 'success', res.data.message);
                     })
                     .catch(error => {
                         console.dir(error);
-                        alert(error.response.data.message);
+                        this.closeModal('del', 'error', error.response.data.message);
                     });
             },
             createModal(name) {
@@ -501,25 +522,49 @@
                 });
             },
             openModal(method, product) {
-                console.log(method, product)
+                this.defaultCurrentProduct();
+
                 if (product) {
                     this.currentProduct = { ...product };
-                    console.log(product.imagesUrl)
-                    this.currentProduct.imagesUrl = product.imagesUrl.reduce((accumulator, currentValue, currentIndex) => {
-                        accumulator[currentIndex] = currentValue;
-                        return accumulator;
-                    }, {});
+                    if (!this.currentProduct.imagesUrl) {
+                        const timestamp = this.timestamp();
+                        this.currentProduct.imagesUrl = { timestamp: '' }
+                    } else {
+                        this.currentProduct.imagesUrl = product.imagesUrl.reduce((accumulator, currentValue, currentIndex) => {
+                            accumulator[currentIndex] = currentValue;
+                            return accumulator;
+                        }, {});
+                    }
+
                 }
 
                 this.initCurrentProduct = JSON.parse(JSON.stringify(this.currentProduct));
 
                 if (method === 'del') {
-                    console.log(method, product)
                     delProductModal.show();
                 } else {
                     productModal.show();
-                    console.log(this)
                 }
+            },
+            closeModal(method, state, message) {
+                this.isLoading = false;
+                let title = '';
+                if (method === 'del') {
+                    delProductModal.hide();
+                    title = '刪除';
+                } else {
+                    productModal.hide();
+                    title = method === 'add' ? '新增' : '編輯';
+                }
+
+                this.getProducts();
+                setTimeout(() => {
+                    swalWithBootstrapButtons.fire({
+                        icon: state,
+                        title: `${title}${state === 'success' ? '成功' : '失敗'}`,
+                        text: message
+                    });
+                }, 500);
             },
             updateImagesUrl(method, imageUrl) {
                 if (method === 'del') {
@@ -528,32 +573,27 @@
                         delete this.isInputErr.imagesUrl[imageUrl];
                     }
                 } else if (method === 'add') {
-                    const key = new Date().getTime();
-                    this.currentProduct.imagesUrl[key] = '';
+                    const timestamp = this.timestamp();
+                    this.currentProduct.imagesUrl[timestamp] = '';
                 }
             },
-            getIsInputChangeValue(data) {
+            getIsInputChangeValue() {
                 const keys = Object.keys(this.currentProduct);
-                console.log(keys)
-                return keys.some(key => {
-                    if (typeof this.currentProduct[key] === 'object') {
-                        return Object.keys(this.currentProduct[key]).some(item =>
-                            this.currentProduct[key][item] !== this.initCurrentProduct[key][item] &&
-                            this.initCurrentProduct[key].hasOwnProperty(item));
+                this.isInputChangeValue = keys.some(key => {
+                    if (this.currentProduct[key] && typeof this.currentProduct[key] === 'object') {
+                        return Object.keys(this.currentProduct[key]).some(childKey => this.currentProduct[key][childKey] &&
+                            this.currentProduct[key][childKey] !== this.initCurrentProduct[key][childKey]);
                     } else {
                         return this.currentProduct[key] !== this.initCurrentProduct[key];
                     }
                 });
             },
-            getInputHasErr() {
-                const values = Object.values(this.isInputErr);
-                return values.some(value => {
-                    if (typeof value === 'object') {
-                        return Object.values(value).some(item => item);
-                    } else {
-                        return value;
-                    }
-                });
+            getIs_enabledLabelName(is_enabled) {
+                const find = formsSchema.product_is_enabled.options.find(option => option.value === is_enabled);
+                return find ? find.label : '';
+            },
+            timestamp() {
+                return new Date().getTime();
             }
         }
     };

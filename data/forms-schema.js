@@ -24,10 +24,10 @@ export const formsSchema = {
         formType: 'input',
         name: '產品名稱',
         type: 'text',
-        error: '必填欄位，最多 30 個字',
+        error: '必填欄位，最多 50 個字',
         validates: {
             isRequired: true,
-            maxlength: 30
+            maxlength: 50
         }
     },
     product_category: {
@@ -106,10 +106,11 @@ export const formsSchema = {
     product_is_enabled: {
         formType: 'radio',
         name: '是否啟用',
-        options: {
-            1: '啟用',
-            0: '停用'
-        },
+        options: [{
+            label: '啟用', value: 1
+        },{
+            label: '停用', value: 0
+        }],
         validates: {
             isRequired: true
         }

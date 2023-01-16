@@ -46,6 +46,7 @@
 <body>
     <div id="app">
         <div class="container py-5">
+            <upload-img></upload-img>
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h1 class="mb-0 h4 fw-bold">產品管理</h1>
                 <button type="button" class="btn btn-primary" @click="openModal('add')">新增產品</button>
@@ -56,6 +57,7 @@
                         <tr>
                             <th scope="col" width="200px">產品名稱</th>
                             <th scope="col" width="120px">分類</th>
+                            <th scope="col" width="120px">廣告標籤</th>
                             <th scope="col" width="120px">原價</th>
                             <th scope="col" width="120px">售價</th>
                             <th scope="col" width="120px">是否啟用</th>
@@ -73,6 +75,7 @@
                                 </div>
                             </th>
                             <td scope="row" class="text-truncate">{{ product.category }}</td>
+                            <td class="text-truncate">{{ product.AD_type ? product.AD_type : '未分類' }}</td>
                             <td class="text-end">${{ product.origin_price }}</td>
                             <td class="text-end">${{ product.price }}</td>
                             <td>
@@ -120,31 +123,20 @@
     import pagination from './components/pagination.js';
     import productModal from './components/product-modal.js';
     import delProductModal from './components/del-product-modal.js';
+    import uploadImg from './components/upload-img.js';
 
     const { createApp } = Vue;
-
-    //let productModal = null;
-    //let delProductModal = null;
-
 
     const app = Vue.createApp({
         data() {
             return {
                 formsSchema,
                 products: {},
-                initCurrentProduct: {},
-                currentProduct: {},
-                isLoading: false,
-                isInputErr: {},
-                inputHasErr: false,
-                isInputChangeValue: false
+                currentProduct: {}
             }
         },
         mounted() {
-            //this.defaultCurrentProduct();
             this.checkUser();
-            //productModal = this.createModal('productModal');
-            //delProductModal = this.createModal('delProductModal');
         },
         computed: {
             productTotal() {
@@ -152,30 +144,11 @@
             }
         },
         methods: {
-            defaultCurrentProduct() {
-                const timestamp = this.timestamp();
-                this.currentProduct = {
-                    title: '',
-                    category: '',
-                    origin_price: null,
-                    price: null,
-                    unit: '',
-                    description: '',
-                    content: '',
-                    imageUrl: '',
-                    imagesUrl: {
-                        [timestamp]: ''
-                    },
-                    is_enabled: 1
-                };
-            },
             checkUser() {
                 const token = document.cookie.replace(/(?:(?:^|.*;\s*)ella-diving-token\s*\=\s*([^;]*).*$)|^.*$/, '$1');
                 axios.defaults.headers.common['Authorization'] = token;
                 axios.post(`${url}/api/user/check`)
-                    .then(res => {
-                        this.getProducts();
-                    })
+                    .then(res => { this.getProducts() })
                     .catch(error => {
                         console.dir(error);
                         location.href = './login.html';
@@ -183,7 +156,6 @@
             },
             getProducts(page) {
                 if (!page) { page = this.products.pagination ? this.products.pagination.current_page : 1 }
-
                 axios.get(`${url}/api/${path}/admin/products?page=${page}`)
                     .then(res => {
                         const { products, pagination } = res.data;
@@ -200,133 +172,24 @@
                         });
                     });
             },
-            addOrEditProduct(id) {
-                this.isLoading = true;
-                this.currentProduct.imagesUrl = Object.values(this.currentProduct.imagesUrl).filter(value => value);
-                const data = { data: this.currentProduct };
-                if (!id) {
-                    axios.post(`${url}/api/${path}/admin/product`, data)
-                        .then(res => {
-                            this.closeModal('add', 'success', res.data.message);
-                        })
-                        .catch(error => {
-                            console.dir(error);
-                            this.closeModal('add', 'error', error.response.data.message);
-                        });
-                } else {
-                    axios.put(`${url}/api/${path}/admin/product/${id}`, data)
-                        .then(res => {
-                            this.closeModal('edit', 'success', res.data.message);
-                        })
-                        .catch(error => {
-                            console.dir(error);
-                            this.closeModal('edit', 'error', error.response.data.message);
-                        });
-                }
-            },
-            delProduct(id) {
-                this.isLoading = true;
-                axios.delete(`${url}/api/${path}/admin/product/${id}`)
-                    .then(res => {
-                        this.closeModal('del', 'success', res.data.message);
-                    })
-                    .catch(error => {
-                        console.dir(error);
-                        this.closeModal('del', 'error', error.response.data.message);
-                    });
-            },
-            // createModal(name) {
-            //     return new bootstrap.Modal(document.getElementById(name), {
-            //         keyboard: false
-            //     });
-            // },
             openModal(method, product) {
-                console.log(method)
                 this.currentProduct = product;
                 if (method === 'del') {
                     delProductModal.methods.openModal();
                 } else {
                     productModal.methods.openModal();
                 }
-
-                // this.defaultCurrentProduct();
-
-                // if (product) {
-                //     this.currentProduct = { ...product };
-                //     if (!this.currentProduct.imagesUrl) {
-                //         const timestamp = this.timestamp();
-                //         this.currentProduct.imagesUrl = { timestamp: '' }
-                //     } else {
-                //         this.currentProduct.imagesUrl = product.imagesUrl.reduce((accumulator, currentValue, currentIndex) => {
-                //             accumulator[currentIndex] = currentValue;
-                //             return accumulator;
-                //         }, {});
-                //     }
-
-                // }
-
-                // this.initCurrentProduct = JSON.parse(JSON.stringify(this.currentProduct));
-
-                // if (method === 'del') {
-                //     delProductModal.show();
-                // } else {
-                //     productModal.show();
-                // }
-            },
-            // closeModal(method, state, message) {
-            //     this.isLoading = false;
-            //     let title = '';
-            //     if (method === 'del') {
-            //         delProductModal.hide();
-            //         title = '刪除';
-            //     } else {
-            //         productModal.hide();
-            //         title = method === 'add' ? '新增' : '編輯';
-            //     }
-
-            //     this.getProducts();
-            //     setTimeout(() => {
-            //         swalWithBootstrapButtons.fire({
-            //             icon: state,
-            //             title: `${title}${state === 'success' ? '成功' : '失敗'}`,
-            //             text: message
-            //         });
-            //     }, 500);
-            // },
-            updateImagesUrl(method, imageUrl) {
-                if (method === 'del') {
-                    if (this.currentProduct.imagesUrl.hasOwnProperty(imageUrl)) {
-                        delete this.currentProduct.imagesUrl[imageUrl];
-                        delete this.isInputErr.imagesUrl[imageUrl];
-                    }
-                } else if (method === 'add') {
-                    const timestamp = this.timestamp();
-                    this.currentProduct.imagesUrl[timestamp] = '';
-                }
-            },
-            getIsInputChangeValue() {
-                const keys = Object.keys(this.currentProduct);
-                this.isInputChangeValue = keys.some(key => {
-                    if (this.currentProduct[key] && typeof this.currentProduct[key] === 'object') {
-                        return Object.keys(this.currentProduct[key]).some(childKey => this.currentProduct[key][childKey] &&
-                            this.currentProduct[key][childKey] !== this.initCurrentProduct[key][childKey]);
-                    } else {
-                        return this.currentProduct[key] !== this.initCurrentProduct[key];
-                    }
-                });
             },
             getIs_enabledLabelName(is_enabled) {
                 const find = formsSchema.product_is_enabled.options.find(option => option.value === is_enabled);
                 return find ? find.label : '';
-            },
-            timestamp() {
-                return new Date().getTime();
             }
         },
         // 練習區域元件
         components: {
             productModal,
-            delProductModal
+            delProductModal,
+            uploadImg
         }
     })
 

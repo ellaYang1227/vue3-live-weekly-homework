@@ -8,7 +8,7 @@ export default {
     data() {
         return {
             formsSchema,
-            initProduct: {},
+            initCurrentProduct: {},
             currentProduct: {},
             isLoading: false,
             isInputErr: {},
@@ -25,11 +25,14 @@ export default {
     watch: {
         product: {
             handler() {
+                console.log('product')
                 const timestamp = this.timestamp();
-                if (!this.product) {
+                if(!this.product){
+                    const timestamp = this.timestamp();
                     this.currentProduct = {
                         title: '',
                         category: '',
+                        AD_type: '',
                         origin_price: null,
                         price: null,
                         unit: '',
@@ -66,40 +69,32 @@ export default {
             handler() {
                 const keys = Object.keys(this.currentProduct);
                 this.isInputChangeValue = false;
-                keys.forEach((key) => {
-                    if (key === 'imageUrl' || key === 'imagesUrl') {
-                        let regex = new RegExp(
-                            formsSchema.product_imageUrl.validates.pattern
-                        );
-                        if (key === 'imageUrl') {
-                            this.isInputErr.imageUrl = !regex.test(
-                                this.currentProduct.imageUrl
+                keys.forEach(key => {
+                    if(key === 'AD_type'){
+                        this.isInputErr.AD_type = false;
+                    }else{
+                        if (key === 'imageUrl' || key === 'imagesUrl') {
+                            let regex = new RegExp(
+                                formsSchema.product_imageUrl.validates.pattern
                             );
+                            if (key === 'imageUrl') {
+                                this.isInputErr.imageUrl = !regex.test(
+                                    this.currentProduct.imageUrl
+                                );
+                            } else {
+                                const imagesUrlKeys = Object.keys(
+                                    this.currentProduct.imagesUrl
+                                );
+                                imagesUrlKeys.forEach(imagesUrlKey => {
+                                    const currentData = this.currentProduct.imagesUrl[imagesUrlKey];
+                                    const isInputErr = currentData && !regex.test(currentData) ? true : false;
+                                    if (!this.isInputErr.imagesUrl) { this.isInputErr.imagesUrl = {} }
+                                    this.isInputErr.imagesUrl[imagesUrlKey] = isInputErr;
+                                });
+                            }
                         } else {
-                            const imagesUrlKeys = Object.keys(
-                                this.currentProduct.imagesUrl
-                            );
-                            imagesUrlKeys.forEach((imagesUrlKey) => {
-                                const currentData =
-                                    this.currentProduct.imagesUrl[imagesUrlKey];
-                                const isInputErr =
-                                    currentData && !regex.test(currentData)
-                                        ? true
-                                        : false;
-                                if (!this.isInputErr.imagesUrl) {
-                                    this.isInputErr.imagesUrl = {};
-                                }
-                                this.isInputErr.imagesUrl[imagesUrlKey] =
-                                    isInputErr;
-                            });
+                            this.isInputErr[key] = this.currentProduct[key] || (key === 'is_enabled' && this.currentProduct[key] === 0) ? false : true;
                         }
-                    } else {
-                        this.isInputErr[key] =
-                            this.currentProduct[key] ||
-                            (key === 'is_enabled' &&
-                                this.currentProduct[key] === 0)
-                                ? false
-                                : true;
                     }
                 });
 
@@ -111,11 +106,9 @@ export default {
         isInputErr: {
             handler() {
                 const values = Object.values(this.isInputErr);
-                this.inputHasErr = values.some((value) => {
+                this.inputHasErr = values.some(value => {
                     if (typeof value === 'object') {
-                        return Object.values(value).some(
-                            (childValue) => childValue
-                        );
+                        return Object.values(value).some(childValue => childValue);
                     } else {
                         return value;
                     }
@@ -128,9 +121,9 @@ export default {
         openModal() {
             productModal.show();
         },
-        closeModal(method, state, message) {
+        closeModal(state, message) {
             this.isLoading = false;
-            let title = method === 'add' ? '新增' : '編輯';
+            let title = this.currentProduct.id ? '新增' : '編輯';
             productModal.hide();
 
             this.$emit('get-products');
@@ -144,22 +137,11 @@ export default {
         },
         getIsInputChangeValue() {
             const keys = Object.keys(this.currentProduct);
-            this.isInputChangeValue = keys.some((key) => {
-                if (
-                    this.currentProduct[key] &&
-                    typeof this.currentProduct[key] === 'object'
-                ) {
-                    return Object.keys(this.currentProduct[key]).some(
-                        (childKey) =>
-                            this.currentProduct[key][childKey] &&
-                            this.currentProduct[key][childKey] !==
-                                this.initCurrentProduct[key][childKey]
-                    );
+            this.isInputChangeValue = keys.some(key => {
+                if (this.currentProduct[key] && typeof this.currentProduct[key] === 'object') {
+                    return Object.keys(this.currentProduct[key]).some(childKey => this.currentProduct[key][childKey] !== this.initCurrentProduct[key][childKey]);
                 } else {
-                    return (
-                        this.currentProduct[key] !==
-                        this.initCurrentProduct[key]
-                    );
+                    return (this.currentProduct[key] !== this.initCurrentProduct[key]);
                 }
             });
         },
@@ -174,39 +156,25 @@ export default {
                 this.currentProduct.imagesUrl[timestamp] = '';
             }
         },
-        addOrEditProduct(id) {
+        addOrEditProduct() {
             this.isLoading = true;
-            this.currentProduct.imagesUrl = Object.values(
-                this.currentProduct.imagesUrl
-            ).filter((value) => value);
+            this.currentProduct.imagesUrl = Object.values(this.currentProduct.imagesUrl).filter((value) => value);
             const data = { data: this.currentProduct };
-            if (!id) {
+            if (!this.currentProduct.id) {
                 axios
                     .post(`${url}/api/${path}/admin/product`, data)
-                    .then((res) => {
-                        this.closeModal('add', 'success', res.data.message);
-                    })
-                    .catch((error) => {
+                    .then(res => {this.closeModal('success', res.data.message)})
+                    .catch(error => {
                         console.dir(error);
-                        this.closeModal(
-                            'add',
-                            'error',
-                            error.response.data.message
-                        );
+                        this.closeModal('error', error.response.data.message);
                     });
             } else {
                 axios
-                    .put(`${url}/api/${path}/admin/product/${id}`, data)
-                    .then((res) => {
-                        this.closeModal('edit', 'success', res.data.message);
-                    })
-                    .catch((error) => {
+                    .put(`${url}/api/${path}/admin/product/${this.currentProduct.id}`, data)
+                    .then(res => {this.closeModal('success', res.data.message)})
+                    .catch(error => {
                         console.dir(error);
-                        this.closeModal(
-                            'edit',
-                            'error',
-                            error.response.data.message
-                        );
+                        this.closeModal('error', error.response.data.message);
                     });
             }
         },
@@ -267,6 +235,18 @@ export default {
                                     :maxlength="formsSchema.product_category.validates.maxlength">
                                 <div class="invalid-feedback" :class="{ 'd-block': isInputErr?.category }">{{
                                     formsSchema.product_category.error }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="inputAD_type" class="form-label d-flex align-items-center">{{
+                                    formsSchema.product_AD_type.name
+                                    }}<font class="text-danger"
+                                        v-if="formsSchema.product_AD_type.validates.isRequired">*
+                                    </font>
+                                </label>
+                                <select id="inputAD_type" class="form-select" :multiple="formsSchema.product_AD_type.isMultiple" v-model="currentProduct.AD_type">
+                                    <option selected value="">請選擇</option>
+                                    <option :value="option.value" v-for="option in formsSchema.product_AD_type.options" :key="option.value">{{ option.label }}</option>
+                                </select>
                             </div>
                         </div>
                         <div class="row g-3 pb-3">
@@ -438,7 +418,7 @@ export default {
                     :disabled="isLoading">取消</button>
                 <button type="submit" class="btn btn-primary"
                     :disabled="isLoading || !isInputChangeValue || inputHasErr"
-                    @click="addOrEditProduct(currentProduct?.id)">
+                    @click="addOrEditProduct">
                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
                         v-if="isLoading"></span>
                     {{ currentProduct?.id ? '修改' : '新增' }}</button>

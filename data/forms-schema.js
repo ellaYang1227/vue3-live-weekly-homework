@@ -40,6 +40,21 @@ export const formsSchema = {
             maxlength: 15
         }
     },
+    product_AD_type: {
+        formType: 'select',
+        name: '廣告標籤',
+        isMultiple: false,
+        options: [{
+            label: '新品上市', value: '新品上市'
+        },{
+            label: '人氣商品', value: '人氣商品'
+        },{
+            label: '強力主打', value: '強力主打'
+        }],
+        validates: {
+            isRequired: false
+        }
+    },
     product_unit: {
         formType: 'input',
         name: '單位',

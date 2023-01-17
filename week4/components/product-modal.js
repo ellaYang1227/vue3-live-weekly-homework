@@ -1,6 +1,7 @@
 import { url, path } from '../../data/data.js';
 import { formsSchema } from '../../data/forms-schema.js';
 import { swalWithBootstrapButtons } from '../../data/sweetalert2.js';
+import uploadImg from './upload-img.js';
 
 let productModal = null;
 
@@ -73,7 +74,7 @@ export default {
                     if(key === 'AD_type'){
                         this.isInputErr.AD_type = false;
                     }else{
-                        if (key === 'imageUrl' || key === 'imagesUrl') {
+                        if (key === 'imageUrl2' || key === 'imagesUrl') {
                             let regex = new RegExp(
                                 formsSchema.product_imageUrl.validates.pattern
                             );
@@ -163,7 +164,7 @@ export default {
             if (!this.currentProduct.id) {
                 axios
                     .post(`${url}/api/${path}/admin/product`, data)
-                    .then(res => {this.closeModal('success', res.data.message)})
+                    .then(res => { this.closeModal('success', res.data.message) })
                     .catch(error => {
                         console.dir(error);
                         this.closeModal('error', error.response.data.message);
@@ -171,7 +172,7 @@ export default {
             } else {
                 axios
                     .put(`${url}/api/${path}/admin/product/${this.currentProduct.id}`, data)
-                    .then(res => {this.closeModal('success', res.data.message)})
+                    .then(res => { this.closeModal('success', res.data.message) })
                     .catch(error => {
                         console.dir(error);
                         this.closeModal('error', error.response.data.message);
@@ -181,6 +182,9 @@ export default {
         timestamp() {
             return new Date().getTime();
         }
+    },
+    components:{
+        uploadImg
     },
     props: {
         product: {
@@ -256,19 +260,8 @@ export default {
                                     v-if="formsSchema.product_imageUrl.validates.isRequired">*
                                 </font>
                             </label>
-                            <div class="col-md-2 mt-0 text-center mb-3" v-if="currentProduct.imageUrl">
-                                <div class="border rounded bg-light">
-                                    <img :src="currentProduct.imageUrl" alt="主圖" class="img-fluid rounded">
-                                </div>
-                            </div>
-                            <div class="col-12 mt-0">
-                                <input :type="formsSchema.product_imageUrl.type" class="form-control"
-                                    id="inputImageUrl" aria-describedby="imageUrlHelp"
-                                    v-model.trim.lazy="currentProduct.imageUrl"
-                                    :required="formsSchema.product_imageUrl.validates.isRequired"
-                                    :class="{ 'is-invalid': isInputErr?.imageUrl }">
-                                <div class="invalid-feedback" :class="{ 'd-block': isInputErr?.imageUrl }">{{
-                                    formsSchema.product_imageUrl.error }}</div>
+                            <div class="col-auto mt-0 mb-3">
+                                <upload-img :isRequired="true" :image-url="currentProduct.imageUrl" @update-image-url="(imageUrl) => currentProduct.imageUrl = imageUrl"></upload-img>
                             </div>
                         </div>
                         <div class="row g-3 pb-3">
@@ -281,6 +274,9 @@ export default {
                                     @click="updateImagesUrl('add')" v-if="currentProduct?.imagesUrl"
                                     :disabled="Object.keys(currentProduct.imagesUrl).length >= 5">新增</button>
                             </label>
+                            <div class="col-auto mt-0 mb-3" v-for="(imageUrl, key) in currentProduct.imagesUrl" :key="key">  
+                            <upload-img :image-url="imageUrl" @update-image-url="(imageUrl) => currentProduct.imagesUrl[key] = imageUrl"></upload-img>
+                            </div>
                             <div class="col-md-2 mt-0 text-center"
                                 v-for="(imageUrl, key, index) in currentProduct.imagesUrl" :key="key">
                                 <div

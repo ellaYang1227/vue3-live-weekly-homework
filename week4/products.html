@@ -20,7 +20,13 @@
         box-shadow: none
     }
 
-    .img-box {
+    img.img-box {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+    }
+
+    /* .img-box {
         width: 75px;
         height: 75px;
         overflow: hidden;
@@ -32,7 +38,7 @@
     .img-box img {
         height: 110%;
         overflow: hidden;
-    }
+    } */
 
     .table {
         table-layout: fixed;
@@ -41,12 +47,28 @@
     .table-responsive thead th {
         word-break: keep-all;
     }
+
+    .file-img {
+        width: 100px;
+        height: 100px;
+        cursor: pointer;
+        border: 1px dashed #ced4da;
+    }
+
+    .file-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .file-img:hover {
+        border-color: #0d6efd;
+    }
 </style>
 
 <body>
     <div id="app">
         <div class="container py-5">
-            <upload-img></upload-img>
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h1 class="mb-0 h4 fw-bold">產品管理</h1>
                 <button type="button" class="btn btn-primary" @click="openModal('add')">新增產品</button>
@@ -68,9 +90,8 @@
                         <tr v-for="product in products.data" :key="product.id">
                             <th>
                                 <div class="d-flex align-items-center">
-                                    <div class="img-box me-2 rounded border flex-shrink-0">
-                                        <img :src="product.imageUrl" :alt="`${product.category} - ${product.title}`">
-                                    </div>
+                                    <img :src="product.imageUrl" :alt="`${product.category} - ${product.title}`"
+                                        class="img-box flex-shrink-0 rounded border me-2">
                                     <h4 class="h6 mb-0 text-truncate fw-bold">{{ product.title }}</h4>
                                 </div>
                             </th>
@@ -92,7 +113,7 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th scope="col" colspan="6" class="text-start">產品數量：{{ productTotal }} 筆</th>
+                            <th scope="col" colspan="7" class="text-start">產品數量：{{ productTotal }} 筆</th>
                         </tr>
                     </tfoot>
                 </table>
@@ -108,6 +129,7 @@
         <product-modal :product="currentProduct" @get-products="getProducts"></product-modal>
     </div>
 
+    <script src="https://kit.fontawesome.com/e977eaa2d8.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ"
         crossorigin="anonymous"></script>
@@ -123,7 +145,6 @@
     import pagination from './components/pagination.js';
     import productModal from './components/product-modal.js';
     import delProductModal from './components/del-product-modal.js';
-    import uploadImg from './components/upload-img.js';
 
     const { createApp } = Vue;
 
@@ -188,8 +209,7 @@
         // 練習區域元件
         components: {
             productModal,
-            delProductModal,
-            uploadImg
+            delProductModal
         }
     })
 

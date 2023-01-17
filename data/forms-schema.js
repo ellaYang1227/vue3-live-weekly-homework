@@ -129,5 +129,15 @@ export const formsSchema = {
         validates: {
             isRequired: true
         }
+    },
+    upload_img:{
+        formType: 'input',
+        type: 'file',
+        accept: 'image/*',
+        validates: {
+            data: '須上傳檔案，其檔案格式為 .png、.jpg、.jpg',
+            type: '檔案格式須為 .png、.jpg、.jpg',
+            size: '檔案大小不能超過 1MB'
+        }
     }
 };

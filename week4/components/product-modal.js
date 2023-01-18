@@ -29,7 +29,6 @@ export default {
                 console.log('product')
                 const timestamp = this.timestamp();
                 if(!this.product){
-                    const timestamp = this.timestamp();
                     this.currentProduct = {
                         title: '',
                         category: '',
@@ -124,7 +123,7 @@ export default {
         },
         closeModal(state, message) {
             this.isLoading = false;
-            let title = this.currentProduct.id ? '新增' : '編輯';
+            let title = this.currentProduct.id ? '編輯' : '新增';
             productModal.hide();
 
             this.$emit('get-products');
@@ -146,15 +145,10 @@ export default {
                 }
             });
         },
-        updateImagesUrl(method, imageUrl) {
-            if (method === 'del') {
-                if (this.currentProduct.imagesUrl.hasOwnProperty(imageUrl)) {
-                    delete this.currentProduct.imagesUrl[imageUrl];
-                    delete this.isInputErr.imagesUrl[imageUrl];
-                }
-            } else if (method === 'add') {
-                const timestamp = this.timestamp();
-                this.currentProduct.imagesUrl[timestamp] = '';
+        delImagesUrlItem(key) {
+            if (this.currentProduct.imagesUrl.hasOwnProperty(key)) {
+                delete this.currentProduct.imagesUrl[key];
+                delete this.isInputErr.imagesUrl[key];
             }
         },
         addOrEditProduct() {
@@ -181,6 +175,28 @@ export default {
         },
         timestamp() {
             return new Date().getTime();
+        },
+        handleChildUploadData(data){
+            console.log(data)
+            const { dataKey, isInputErr, uploadImgUrl } = data;
+            if(dataKey === 'imageUrl'){
+                this.currentProduct.imageUrl = uploadImgUrl;
+                this.isInputErr.imageUrl = isInputErr;
+            }else{
+                this.currentProduct.imagesUrl[dataKey] = uploadImgUrl;
+                this.isInputErr.imagesUrl[dataKey] = isInputErr;
+                
+                // 全部 imagesUrl 都有資料，再新增一個新的 imagesUrl
+                const allImagesUrlhasData = Object.values(this.currentProduct.imagesUrl).every(value => value);
+                console.log('allImagesUrlhasData', allImagesUrlhasData)
+                
+                if(allImagesUrlhasData && !isInputErr && uploadImgUrl){
+                    const timestamp = this.timestamp();
+                    this.currentProduct.imagesUrl[timestamp] = '';
+                }
+            }
+
+            console.log('this.isInputErr', this.isInputErr, 'this.currentProduct', this.currentProduct)
         }
     },
     components:{
@@ -208,9 +224,9 @@ export default {
                             <div class="col-12">
                                 <label for="inputTitle" class="form-label d-flex align-items-center">{{
                                     formsSchema.product_title.name }}
-                                    <font class="text-danger"
+                                    <span class="text-danger"
                                         v-if="formsSchema.product_title.validates.isRequired">
-                                        *</font><small class="ms-auto"
+                                        *</span><small class="ms-auto"
                                         :class="[currentProduct?.title?.length === formsSchema.product_title.validates.maxlength ? 'text-danger' : 'text-muted']">
                                        {{ currentProduct?.title?.length }}/{{ formsSchema.product_title.validates.maxlength }}</small>
                                 </label>
@@ -226,9 +242,9 @@ export default {
                             <div class="col-md-6">
                                 <label for="inputCategory" class="form-label d-flex align-items-center">{{
                                     formsSchema.product_category.name
-                                    }}<font class="text-danger"
+                                    }}<span class="text-danger"
                                         v-if="formsSchema.product_category.validates.isRequired">*
-                                    </font><small class="ms-auto"
+                                    </span><small class="ms-auto"
                                         :class="[currentProduct?.category?.length === formsSchema.product_category.validates.maxlength ? 'text-danger' : 'text-muted']">{{ currentProduct?.category?.length }}/{{ formsSchema.product_category.validates.maxlength }}</small>
                                 </label>
                                 <input :type="formsSchema.product_category.type" class="form-control"
@@ -243,9 +259,9 @@ export default {
                             <div class="col-md-6">
                                 <label for="inputAD_type" class="form-label d-flex align-items-center">{{
                                     formsSchema.product_AD_type.name
-                                    }}<font class="text-danger"
+                                    }}<span class="text-danger"
                                         v-if="formsSchema.product_AD_type.validates.isRequired">*
-                                    </font>
+                                    </span>
                                 </label>
                                 <select id="inputAD_type" class="form-select" :multiple="formsSchema.product_AD_type.isMultiple" v-model="currentProduct.AD_type">
                                     <option selected value="">請選擇</option>
@@ -256,63 +272,34 @@ export default {
                         <div class="row g-3 pb-3">
                             <label for="inputImageUrl" class="form-label">{{
                                 formsSchema.product_imageUrl.name
-                                }}<font class="text-danger"
+                                }}<span class="text-danger"
                                     v-if="formsSchema.product_imageUrl.validates.isRequired">*
-                                </font>
+                                </span>
                             </label>
                             <div class="col-auto mt-0 mb-3">
-                                <upload-img :isRequired="true" :image-url="currentProduct.imageUrl" @update-image-url="(imageUrl) => currentProduct.imageUrl = imageUrl"></upload-img>
+                                <upload-img :isRequired="true" dataKey="imageUrl" :imageUrl="currentProduct.imageUrl" @update-image="handleChildUploadData"></upload-img>
                             </div>
                         </div>
                         <div class="row g-3 pb-3">
-                            <label for="inputImagesUrl" class="form-label d-flex align-items-center">{{
+                            <label for="inputImagesUrl" class="form-label">{{
                                 formsSchema.product_imagesUrl.name
-                                }}<font class="text-danger"
+                                }}<span class="text-danger"
                                     v-if="formsSchema.product_imagesUrl.validates.isRequired">*
-                                </font>
-                                <button type="button" class="btn btn-link p-0 ms-auto"
-                                    @click="updateImagesUrl('add')" v-if="currentProduct?.imagesUrl"
-                                    :disabled="Object.keys(currentProduct.imagesUrl).length >= 5">新增</button>
+                                </span>
                             </label>
-                            <div class="col-auto mt-0 mb-3" v-for="(imageUrl, key) in currentProduct.imagesUrl" :key="key">  
-                            <upload-img :image-url="imageUrl" @update-image-url="(imageUrl) => currentProduct.imagesUrl[key] = imageUrl"></upload-img>
-                            </div>
-                            <div class="col-md-2 mt-0 text-center"
-                                v-for="(imageUrl, key, index) in currentProduct.imagesUrl" :key="key">
-                                <div
-                                    class="border rounded bg-light h-100 d-flex flex-column justify-content-center">
-                                    <img :src="imageUrl" :alt="'圖' + (index + 1)" class="img-fluid rounded"
-                                        v-if="imageUrl">
-                                    <template v-else>圖{{ index + 1 }}<small
-                                            class="d-block">沒有圖片</small></template>
-                                </div>
-                            </div>
-                            <div class="col-12" v-for="(imageUrl, key, index) in currentProduct.imagesUrl"
-                                :key="imageUrl">
-                                <div class="d-flex align-items-center">
-                                    <input :type="formsSchema.product_imagesUrl.type" class="form-control"
-                                        :id="'inputimagesUrl-' + key" :aria-describedby="'imagesUrlHelp-' + key"
-                                        v-model.trim.lazy="currentProduct.imagesUrl[key]"
-                                        :required="formsSchema.product_imagesUrl.validates.isRequired"
-                                        :class="{ 'is-invalid': isInputErr?.imagesUrl[key] }">
-                                    <div
-                                        class="d-grid gap-0 d-md-flex justify-content-md-end flex-shrink-0 ms-md-2">
-                                        <button type="button" class="btn btn-link btn-sm text-danger"
-                                            @click="updateImagesUrl('del', key)"
-                                            v-if="Object.keys(currentProduct.imagesUrl).length > 1">刪除</button>
-                                    </div>
-                                </div>
-                                <div class="invalid-feedback"
-                                    :class="{ 'd-block': isInputErr?.imagesUrl[key] }">{{
-                                    formsSchema.product_imageUrl.error }}</div>
+                            <div v-for="(imageUrl, key) in currentProduct.imagesUrl" :key="key">div - {{ imageUrl }}{{ key }}</div>
+                            <div class="col-auto mt-0 d-flex flex-column" v-for="(imageUrl, key) in currentProduct.imagesUrl" :key="key">
+                            {{ imageUrl }}
+                                <upload-img :dataKey="key" :imageUrl="imageUrl" @update-image="handleChildUploadData"></upload-img>
+                                <button type="button" class="btn btn-link btn-sm text-danger text-decoration-none" @click="delImagesUrlItem(key)" v-if="Object.keys(currentProduct.imagesUrl).length > 1 && imageUrl">刪除</button>
                             </div>
                         </div>
                         <div class="row g-3 pb-3">
                             <div class="col-12">
                                 <label for="textareaDescription" class="form-label">{{
                                     formsSchema.product_description.name
-                                    }}<font class="text-danger"
-                                        v-if="formsSchema.product_description.validates.isRequired">*</font>
+                                    }}<span class="text-danger"
+                                        v-if="formsSchema.product_description.validates.isRequired">*</span>
                                 </label>
                                 <textarea rows="10" class="form-control" id="textareaDescription"
                                     v-model.trim.lazy="currentProduct.description"
@@ -324,8 +311,8 @@ export default {
                             <div class="col-12">
                                 <label for="textareaContent" class="form-label">{{
                                     formsSchema.product_content.name
-                                    }}<font class="text-danger"
-                                        v-if="formsSchema.product_content.validates.isRequired">*</font>
+                                    }}<span class="text-danger"
+                                        v-if="formsSchema.product_content.validates.isRequired">*</span>
                                 </label>
                                 <textarea rows="3" class="form-control" id="textareaContent"
                                     v-model.trim.lazy="currentProduct.content"
@@ -336,9 +323,9 @@ export default {
                             </div>
                             <div class="col-md-4">
                                 <label for="inputUnit" class="form-label">{{ formsSchema.product_unit.name
-                                    }}<font class="text-danger"
+                                    }}<span class="text-danger"
                                         v-if="formsSchema.product_unit.validates.isRequired">*
-                                    </font>
+                                    </span>
                                 </label>
                                 <input :type="formsSchema.product_unit.type" class="form-control" id="inputUnit"
                                     aria-describedby="unitHelp" v-model.trim.lazy="currentProduct.unit"
@@ -352,9 +339,9 @@ export default {
                             <div class="col-md-4">
                                 <label for="inputOrigin_price" class="form-label">{{
                                     formsSchema.product_origin_price.name
-                                    }}<font class="text-danger"
+                                    }}<span class="text-danger"
                                         v-if="formsSchema.product_origin_price.validates.isRequired">*
-                                    </font>
+                                    </span>
                                 </label>
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
@@ -371,9 +358,9 @@ export default {
                             <div class="col-md-4">
                                 <label for="inputPrice" class="form-label">{{
                                     formsSchema.product_price.name
-                                    }}<font class="text-danger"
+                                    }}<span class="text-danger"
                                         v-if="formsSchema.product_price.validates.isRequired">*
-                                    </font>
+                                    </span>
                                 </label>
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
@@ -391,8 +378,8 @@ export default {
                         <div class="row g-3 pb-3">
                             <div class="col-12">
                                 <label class="form-label">{{ formsSchema.product_is_enabled.name
-                                    }}<font class="text-danger"
-                                        v-if="formsSchema.product_is_enabled.validates.isRequired">*</font>
+                                    }}<span class="text-danger"
+                                        v-if="formsSchema.product_is_enabled.validates.isRequired">*</span>
                                 </label>
                                 <div class="form-check form-check-inline"
                                     v-for="(option, index) in formsSchema.product_is_enabled.options"

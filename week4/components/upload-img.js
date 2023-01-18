@@ -7,16 +7,20 @@ export default {
         return {
             formsSchema,
             uploadImgUrl: '',
-            errMsgs: []
+            errMsgs: [],
+            isLoading: false
         }
     },
     watch:{
         imageUrl(){
+            console.log(this.imageUrl)
             this.uploadImgUrl = this.imageUrl;
+            console.log(this.uploadImgUrl)
         }
     },
     methods: {
         validatesUploadfile(event){
+            this.isLoading = true;
             this.errMsgs = [];
             const { data, type, size } = this.formsSchema.upload_img.validates;
             const file = event.target.files[0];
@@ -34,39 +38,72 @@ export default {
                 if(file.size / 1024 / 1024 > 1){
                     this.errMsgs.push(size);
                 }
-                
             }
             
             if(!this.errMsgs.length){ 
                 this.upload(file); 
             }else{
-                this.$emit('update-image-url', '');
+                this.setSwalError();
             }
         },
         upload(file){
-            this.uploadImgUrl = 'https://storage.googleapis.com/vue-course-api.appspot.com/ella-diving/1673957921444.png?GoogleAccessId=firebase-adminsdk-zzty7%40vue-course-api.iam.gserviceaccount.com&Expires=1742169600&Signature=S3SmQhKS35%2B6mbxqq2D7caDpurRZIAvSlnnAc1Oj2CybQEMBhmXpmGUdXwvUKADBkRy6l6BL6E8DaehachbONgbGCIXtjlUXNba%2FcMQKLI3tP3VYo2wwL091Y3HVqIRUeDhG6lwkt9YqYEO3M%2B3k9RoRwpPGdOh2ZlBQ6WHqrXYbCr2lRriamT2gRgYngSKD%2FkuPGkOOZFAbGRjZ4On5ddpFxf%2FyGdhMXqqVRkhoXE9CLgY3w8E%2BHS9mOf3mVfxTjwttxlgyPh%2B5UxZAjllIBCaibUfhFmGUf8FEYmPbVvEzxPlZmKnSJkqQ89cz0tH4i5jyEK0tSO%2BOVfNO0UCCqg%3D%3D'
-            // let formData = new FormData();
-            // formData.append('file-to-upload', file);
+            const formData = new FormData();
+            formData.append('file-to-upload', file);
 
-            // axios
-            //     .post(`${url}/api/${path}/admin/upload`, formData)
-            //     .then(res => {
-            //         this.uploadImgUrl = res;
-            //         this.$emit('update-image-url', this.uploadImgUrl);
-            //     })
-            //     .catch(error => {
-            //         console.dir(error);
-            //         this.$emit('update-image-url', this.uploadImgUrl);
-            //         swalWithBootstrapButtons.fire({
-            //             icon: 'error',
-            //             title: error.response.data.message
-            //         });
-            //     });
-            this.$emit('update-image-url', this.uploadImgUrl);
+            axios
+                .post(`${url}/api/${path}/admin/upload`, formData)
+                .then(res => {
+                    console.log(res)
+                    const { success, imageUrl } = res.data;
+                    if(success){
+                        this.uploadImgUrl = imageUrl;
+                        this.emitData();
+                    }else{
+                        this.setSwalError();
+                    }
+                })
+                .catch(error => {
+                    console.dir(error);
+                    this.setSwalError(error.response.data.message);
+                });
+        },
+        emitData(){
+            const data = {
+                dataKey: this.dataKey,
+                uploadImgUrl: this.uploadImgUrl,
+                isInputErr: this.errMsgs.length || this.isRequired && !this.uploadImgUrl ? true : false
+            };
+
+            console.log(data)
+            this.isLoading = false;
+            this.$emit('update-image', data);
+        },
+        setSwalError(error){
+            let html = error;
+            if(this.errMsgs.length){
+                html = this.errMsgs.reduce((accumulator, currentValue) => {
+                    return accumulator + `<li>${currentValue}</li>`
+                }, '');
+
+                html = `<ul class="list-unstyled">${html}</ul>`;
+            }
+            swalWithBootstrapButtons.fire({
+                icon: 'error',
+                title: '上傳失敗',
+                html,
+                timer: null
+            });
+
+            this.uploadImgUrl = '';
+            this.emitData();
         }
     },
     props:{
         imageUrl: String,
+        dataKey: {
+            type: String,
+            required: true,
+        },
         isRequired:{
             type: Boolean,
             default: false
@@ -75,11 +112,15 @@ export default {
     template: `<label class="file-img rounded p-1" :class="{ 'border-danger': errMsgs.length || isRequired && !uploadImgUrl }">
                 <input class="form-control d-none" :type="formsSchema.upload_img.type" :accept="formsSchema.upload_img.accept" @change="validatesUploadfile($event)">
                 <div class="bg-light w-100 h-100 d-flex flex-column align-items-center justify-content-center">
-                    <img :src="uploadImgUrl" v-if="uploadImgUrl">
-                    <i v-else class="fa-solid fa-arrow-up-from-bracket fa-2x text-muted opacity-50"></i>
+                    圖{{ uploadImgUrl }}<br/>imageUrl: {{ imageUrl }}<br/>dataKey: {{ dataKey }}
+                    <template v-if="!isLoading">
+                        <img :src="uploadImgUrl" v-if="uploadImgUrl">
+                        <i v-else class="fa-solid fa-arrow-up-from-bracket fa-2x text-muted opacity-50"></i>
+                    </template>
+                    <div v-else class="d-flex flex-column align-items-center justify-content-center opacity-50 text-secondary">
+                        <div class="spinner-border" role="status" aria-hidden="true"></div>
+                        <small class="pt-1">Loading...</small>
+                    </div>
                 </div>
-            </label>
-            <ul class="list-unstyled invalid-feedback mb-0" :class="{ 'd-block': errMsgs.length }">
-              <li v-for="errMsg in errMsgs" :key="errMsg">{{ errMsg }}</li>
-            </ul>`
+            </label>`
 }

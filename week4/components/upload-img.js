@@ -13,9 +13,9 @@ export default {
     },
     watch:{
         imageUrl(){
-            console.log(this.imageUrl)
+            console.log('this.imageUrl', this.imageUrl)
             this.uploadImgUrl = this.imageUrl;
-            console.log(this.uploadImgUrl)
+            console.log('this.uploadImgUrl', this.uploadImgUrl)
         }
     },
     methods: {
@@ -71,7 +71,7 @@ export default {
             const data = {
                 dataKey: this.dataKey,
                 uploadImgUrl: this.uploadImgUrl,
-                isInputErr: this.errMsgs.length || this.isRequired && !this.uploadImgUrl ? true : false
+                isInputErr: this.isRequired && this.errMsgs.length && !this.uploadImgUrl ? true : false
             };
 
             console.log(data)
@@ -112,7 +112,6 @@ export default {
     template: `<label class="file-img rounded p-1" :class="{ 'border-danger': errMsgs.length || isRequired && !uploadImgUrl }">
                 <input class="form-control d-none" :type="formsSchema.upload_img.type" :accept="formsSchema.upload_img.accept" @change="validatesUploadfile($event)">
                 <div class="bg-light w-100 h-100 d-flex flex-column align-items-center justify-content-center">
-                    圖{{ uploadImgUrl }}<br/>imageUrl: {{ imageUrl }}<br/>dataKey: {{ dataKey }}
                     <template v-if="!isLoading">
                         <img :src="uploadImgUrl" v-if="uploadImgUrl">
                         <i v-else class="fa-solid fa-arrow-up-from-bracket fa-2x text-muted opacity-50"></i>

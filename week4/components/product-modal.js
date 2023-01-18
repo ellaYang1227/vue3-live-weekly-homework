@@ -4,7 +4,7 @@ import { swalWithBootstrapButtons } from '../../data/sweetalert2.js';
 import uploadImg from './upload-img.js';
 
 let productModal = null;
-
+const img = 'https://storage.googleapis.com/vue-course-api.appspot.com/ella-diving/1674041258536.jpg?GoogleAccessId=firebase-adminsdk-zzty7%40vue-course-api.iam.gserviceaccount.com&Expires=1742169600&Signature=lFu5sWiDqiTpdXRnTy7JDxehQutHo%2BUiMCzUWG1YMKiBog8n%2BheIHZ%2BxK2AyImQEBroKAtGj6ATRzxT8l%2FfwN49Ztc5GqHFTnAHsuSlH07IJN9CH6h%2Bw2Q%2BbYFM%2FjmRh%2FkSZmfaK2nxyestH9FZ1xJtiecI2TS0xPiuXk%2FRncf%2BW4iBRf62tlEK6lfTQt20CytCSEnrE6wYBKQq49nGKyngZ%2FssMSHUOLcxSpQ3cedXRj7dM52podap1pM9j6flGZ1qdihTpQrkv2QcDqrSPz2DQSQDYrJ4gtVeAYrHw5fYzx%2BbQtz6kwF96cj0yjp0HzNW0ylSoCneY2We0COtnkw%3D%3D'
 export default {
     data() {
         return {
@@ -26,25 +26,26 @@ export default {
     watch: {
         product: {
             handler() {
-                console.log('product')
+                console.log('product', this.product)
                 const timestamp = this.timestamp();
-                if(!this.product){
-                    this.currentProduct = {
-                        title: '',
-                        category: '',
-                        AD_type: '',
-                        origin_price: null,
-                        price: null,
-                        unit: '',
-                        description: '',
-                        content: '',
-                        imageUrl: '',
-                        imagesUrl: {
-                            [timestamp]: ''
-                        },
-                        is_enabled: 1
-                    };
-                } else {
+                this.isInputErr = {};
+                this.currentProduct = {
+                    title: '',
+                    category: '',
+                    AD_type: '',
+                    origin_price: null,
+                    price: null,
+                    unit: '',
+                    description: '',
+                    content: '',
+                    imageUrl: '',
+                    imagesUrl: {
+                        [timestamp]: ''
+                    },
+                    is_enabled: 1,
+                };
+
+                if(this.product){
                     this.currentProduct = { ...this.product };
                     if (!this.currentProduct.imagesUrl) {
                         this.currentProduct.imagesUrl = { [timestamp]: '' };
@@ -63,6 +64,8 @@ export default {
                 this.initCurrentProduct = JSON.parse(
                     JSON.stringify(this.currentProduct)
                 );
+
+                console.log('currentProduct', this.currentProduct)
             }
         },
         currentProduct: {
@@ -73,25 +76,12 @@ export default {
                     if(key === 'AD_type'){
                         this.isInputErr.AD_type = false;
                     }else{
-                        if (key === 'imageUrl2' || key === 'imagesUrl') {
-                            let regex = new RegExp(
-                                formsSchema.product_imageUrl.validates.pattern
-                            );
-                            if (key === 'imageUrl') {
-                                this.isInputErr.imageUrl = !regex.test(
-                                    this.currentProduct.imageUrl
-                                );
-                            } else {
-                                const imagesUrlKeys = Object.keys(
-                                    this.currentProduct.imagesUrl
-                                );
-                                imagesUrlKeys.forEach(imagesUrlKey => {
-                                    const currentData = this.currentProduct.imagesUrl[imagesUrlKey];
-                                    const isInputErr = currentData && !regex.test(currentData) ? true : false;
-                                    if (!this.isInputErr.imagesUrl) { this.isInputErr.imagesUrl = {} }
-                                    this.isInputErr.imagesUrl[imagesUrlKey] = isInputErr;
-                                });
-                            }
+                        if (key === 'imagesUrl') {
+                            const imagesUrlKeys = Object.keys(this.currentProduct.imagesUrl);
+                            imagesUrlKeys.forEach(imagesUrlKey => {
+                                if (!this.isInputErr.imagesUrl) { this.isInputErr.imagesUrl = {} }
+                                this.isInputErr.imagesUrl[imagesUrlKey] = false;
+                            });
                         } else {
                             this.isInputErr[key] = this.currentProduct[key] || (key === 'is_enabled' && this.currentProduct[key] === 0) ? false : true;
                         }
@@ -186,17 +176,24 @@ export default {
                 this.currentProduct.imagesUrl[dataKey] = uploadImgUrl;
                 this.isInputErr.imagesUrl[dataKey] = isInputErr;
                 
+                this.addImagesUrlItem();
+            }
+
+            console.log('this.isInputErr', this.isInputErr, 'this.currentProduct', this.currentProduct)
+        },
+        addImagesUrlItem(){
+            const allImagesUrl = Object.values(this.currentProduct.imagesUrl);
+            if(5 > allImagesUrl.length){
                 // 全部 imagesUrl 都有資料，再新增一個新的 imagesUrl
-                const allImagesUrlhasData = Object.values(this.currentProduct.imagesUrl).every(value => value);
-                console.log('allImagesUrlhasData', allImagesUrlhasData)
+                const allhaveData = allImagesUrl.every(url => url);
+                const allDataPass = Object.values(this.isInputErr.imagesUrl).every(isErr => !isErr);
+                console.log('allhaveData', allhaveData, 'allDataPass', allDataPass)
                 
-                if(allImagesUrlhasData && !isInputErr && uploadImgUrl){
+                if(allhaveData && allDataPass){
                     const timestamp = this.timestamp();
                     this.currentProduct.imagesUrl[timestamp] = '';
                 }
             }
-
-            console.log('this.isInputErr', this.isInputErr, 'this.currentProduct', this.currentProduct)
         }
     },
     components:{
@@ -276,8 +273,8 @@ export default {
                                     v-if="formsSchema.product_imageUrl.validates.isRequired">*
                                 </span>
                             </label>
-                            <div class="col-auto mt-0 mb-3">
-                                <upload-img :isRequired="true" dataKey="imageUrl" :imageUrl="currentProduct.imageUrl" @update-image="handleChildUploadData"></upload-img>
+                            <div class="col-auto mt-0">
+                                <upload-img :is-required="true" data-key="imageUrl" :image-url="currentProduct.imageUrl" @update-image="handleChildUploadData"></upload-img>
                             </div>
                         </div>
                         <div class="row g-3 pb-3">
@@ -287,10 +284,8 @@ export default {
                                     v-if="formsSchema.product_imagesUrl.validates.isRequired">*
                                 </span>
                             </label>
-                            <div v-for="(imageUrl, key) in currentProduct.imagesUrl" :key="key">div - {{ imageUrl }}{{ key }}</div>
                             <div class="col-auto mt-0 d-flex flex-column" v-for="(imageUrl, key) in currentProduct.imagesUrl" :key="key">
-                            {{ imageUrl }}
-                                <upload-img :dataKey="key" :imageUrl="imageUrl" @update-image="handleChildUploadData"></upload-img>
+                                <upload-img :data-key="key" :image-url="imageUrl" @update-image="handleChildUploadData"></upload-img>
                                 <button type="button" class="btn btn-link btn-sm text-danger text-decoration-none" @click="delImagesUrlItem(key)" v-if="Object.keys(currentProduct.imagesUrl).length > 1 && imageUrl">刪除</button>
                             </div>
                         </div>
@@ -401,9 +396,7 @@ export default {
                     :disabled="isLoading">取消</button>
                 <button type="submit" class="btn btn-primary"
                     :disabled="isLoading || !isInputChangeValue || inputHasErr"
-                    @click="addOrEditProduct">
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
-                        v-if="isLoading"></span>
+                    @click="addOrEditProduct"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" v-if="isLoading"></span>
                     {{ currentProduct?.id ? '修改' : '新增' }}</button>
             </div>
         </div>

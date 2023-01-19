@@ -123,7 +123,7 @@ export default {
             let title = this.currentProduct.id ? '編輯' : '新增';
             productModal.hide();
 
-            this.$emit('get-products');
+            this.$emit('get-products', this.currentProduct.id ? '' : 1);
             setTimeout(() => {
                 swalWithBootstrapButtons.fire({
                     icon: state,

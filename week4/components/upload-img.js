@@ -13,9 +13,7 @@ export default {
     },
     watch:{
         imageUrl(){
-            console.log('this.imageUrl', this.imageUrl)
             this.uploadImgUrl = this.imageUrl;
-            console.log('this.uploadImgUrl', this.uploadImgUrl)
         }
     },
     methods: {
@@ -53,7 +51,6 @@ export default {
             axios
                 .post(`${url}/api/${path}/admin/upload`, formData)
                 .then(res => {
-                    console.log(res)
                     const { success, imageUrl } = res.data;
                     if(success){
                         this.uploadImgUrl = imageUrl;
@@ -71,10 +68,9 @@ export default {
             const data = {
                 dataKey: this.dataKey,
                 uploadImgUrl: this.uploadImgUrl,
-                isInputErr: this.isRequired && this.errMsgs.length && !this.uploadImgUrl ? true : false
+                isInputErr: this.isRequired && (this.errMsgs.length || !this.uploadImgUrl) ? true : false
             };
 
-            console.log(data)
             this.isLoading = false;
             this.$emit('update-image', data);
         },
@@ -87,6 +83,7 @@ export default {
 
                 html = `<ul class="list-unstyled">${html}</ul>`;
             }
+
             swalWithBootstrapButtons.fire({
                 icon: 'error',
                 title: '上傳失敗',
@@ -112,7 +109,7 @@ export default {
             default: false
         }
     },
-    template: `<label class="file-img rounded p-1" :class="{ 'border-danger': errMsgs.length || isRequired && !uploadImgUrl }">
+    template: `<label class="file-img rounded p-1" :class="{ 'border-danger': isRequired && (!uploadImgUrl || errMsgs.length) }">
                 <input class="form-control d-none" :type="formsSchema.upload_img.type" :accept="formsSchema.upload_img.accept" @change="validatesUploadfile($event)">
                 <div class="bg-light w-100 h-100 d-flex flex-column align-items-center justify-content-center">
                     <template v-if="!isLoading">

@@ -26,20 +26,6 @@
         object-fit: cover;
     }
 
-    /* .img-box {
-        width: 75px;
-        height: 75px;
-        overflow: hidden;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .img-box img {
-        height: 110%;
-        overflow: hidden;
-    } */
-
     .table {
         table-layout: fixed;
     }
@@ -123,8 +109,8 @@
         </div>
 
         <!-- modal 刪除 -->
-        <del-product-modal ref="childDelProductModal" :product="currentProduct"
-            @get-products="getProducts"></del-product-modal>
+        <del-product-modal ref="childDelProductModal" :product="currentProduct" @get-products="getProducts">
+        </del-product-modal>
 
         <!-- modal 新增或修改 -->
         <product-modal ref="childProductModal" :product="currentProduct" @get-products="getProducts"></product-modal>
@@ -173,6 +159,8 @@
                     .then(res => { this.getProducts() })
                     .catch(error => {
                         console.dir(error);
+                        // 清除 cookie
+                        document.cookie = `${path}-token=${token}; max-age=0`;
                         location.href = './login.html';
                     });
             },
@@ -196,35 +184,6 @@
             },
             openModal(method, product) {
                 this.currentProduct = { ...product };
-                // this.currentProduct = {
-                //     title: '',
-                //     category: '',
-                //     AD_type: '',
-                //     origin_price: null,
-                //     price: null,
-                //     unit: '',
-                //     description: '',
-                //     content: '',
-                //     imageUrl: '',
-                //     imagesUrl: {},
-                //     is_enabled: 1,
-                // };
-
-                // const keys = Object.keys(this.currentProduct);
-                // keys.forEach(key => {
-                //     if (key !== 'imagesUrl') {
-                //         this.currentProduct[key] = product[key];
-                //     } else {
-                //         for (let i = 0; i < 5; i++) {
-                //             const imageUrl = product.imagesUrl ? product.imagesUrl[i] : '';
-                //             const addimagesUrlItem = {
-                //                 show: imageUrl ? true : false,
-                //                 imageUrl
-                //             };
-                //             this.currentProduct.imagesUrl[`img${i + 1}`] = addimagesUrlItem;
-                //         }
-                //     }
-                // });
 
                 if (method === 'del') {
                     this.$refs.childDelProductModal.openModal();

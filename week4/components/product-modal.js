@@ -4,7 +4,7 @@ import { swalWithBootstrapButtons } from '../../data/sweetalert2.js';
 import uploadImg from './upload-img.js';
 
 let productModal = null;
-const img = 'https://storage.googleapis.com/vue-course-api.appspot.com/ella-diving/1674041258536.jpg?GoogleAccessId=firebase-adminsdk-zzty7%40vue-course-api.iam.gserviceaccount.com&Expires=1742169600&Signature=lFu5sWiDqiTpdXRnTy7JDxehQutHo%2BUiMCzUWG1YMKiBog8n%2BheIHZ%2BxK2AyImQEBroKAtGj6ATRzxT8l%2FfwN49Ztc5GqHFTnAHsuSlH07IJN9CH6h%2Bw2Q%2BbYFM%2FjmRh%2FkSZmfaK2nxyestH9FZ1xJtiecI2TS0xPiuXk%2FRncf%2BW4iBRf62tlEK6lfTQt20CytCSEnrE6wYBKQq49nGKyngZ%2FssMSHUOLcxSpQ3cedXRj7dM52podap1pM9j6flGZ1qdihTpQrkv2QcDqrSPz2DQSQDYrJ4gtVeAYrHw5fYzx%2BbQtz6kwF96cj0yjp0HzNW0ylSoCneY2We0COtnkw%3D%3D'
+
 export default {
     data() {
         return {
@@ -23,102 +23,36 @@ export default {
             { keyboard: false }
         );
 
-        this.isInputErr = {};
-        const imagesUrl = {};
-        for (let i = 0; i < 5; i++) {
-            imagesUrl[`img${i + 1}`] = { 
-                show: i === 0 ? true : false,
-                imageUrl: ''
-            };
+        this.setDefaultCurrentProduct();
+    },
+    computed:{
+        imagesUrlHasDataTotal(){
+            const imagesUrl = Object.values(this.currentProduct.imagesUrl);
+            return imagesUrl.filter(imgUrl => imgUrl).length;
         }
-        
-        this.currentProduct = {
-            title: '',
-            category: '',
-            AD_type: '',
-            origin_price: null,
-            price: null,
-            unit: '',
-            description: '',
-            content: '',
-            imageUrl: '',
-            imagesUrl,
-            is_enabled: 1,
-        };
-
-        console.log('this.currentProduct', this.currentProduct)
     },
     watch: {
         product: {
             handler() {
-                console.log('product', this.product)
-                const timestamp = this.timestamp();
-                // this.isInputErr = {};
-                // this.currentProduct = {
-                //     title: '',
-                //     category: '',
-                //     AD_type: '',
-                //     origin_price: null,
-                //     price: null,
-                //     unit: '',
-                //     description: '',
-                //     content: '',
-                //     imageUrl: '',
-                //     imagesUrl: {
-                //         [`${timestamp}0`]: '',
-                //         [`${timestamp}1`]: '',
-                //         [`${timestamp}2`]: '',
-                //         [`${timestamp}3`]: '',
-                //         [`${timestamp}4`]: ''
-                //     },
-                //     is_enabled: 1,
-                // };
-
-                if(this.product){
-                    const keys = Object.keys(this.currentProduct);
+                this.setDefaultCurrentProduct();
+                if(this.product.id){
+                    const keys = Object.keys(this.product);
                     keys.forEach(key => {
                         if(key !== 'imagesUrl'){
                             this.currentProduct[key] = this.product[key];
                         }else{
                             const imagesUrlKeys = Object.keys(this.currentProduct.imagesUrl);
                             imagesUrlKeys.forEach((imagesUrlKey, index) => {
-                                const imageUrl = this.product.imagesUrl ? this.product.imagesUrl[index] : '';
-                                this.currentProduct.imagesUrl[imagesUrlKey].imageUrl = imageUrl;
-                                this.currentProduct.imagesUrl[imagesUrlKey].show = imageUrl ? true : false;
+                                const imageUrl = this.product.imagesUrl && this.product.imagesUrl[index] ? this.product.imagesUrl[index] : '';
+                                this.currentProduct.imagesUrl[imagesUrlKey] = imageUrl;
                             });
                         }
                     });
-                    // console.log(this.currentProduct)
-                    // this.currentProduct = { ...this.product };
-                    // if (!this.currentProduct.imagesUrl) {
-                    //     //this.currentProduct.imagesUrl = { [timestamp]: '' };
-                    // } else {
-                    //     console.log(this.currentProduct)
-                    //     this.currentProduct.imagesUrl =
-                    //         this.product.imagesUrl.reduce(
-                    //             (accumulator, currentValue, currentIndex) => {
-                    //                 accumulator[currentIndex] = currentValue;
-                    //                 return accumulator;
-                    //             },
-                    //             {}
-                    //         );
-                    //     const imagesUrl = this.product.imagesUrl.reduce((accumulator, currentValue, currentIndex) => {
-                    //         accumulator[currentIndex] = currentValue;
-                    //         return accumulator;
-                    //     },{});
-
-                    //     this.currentProduct.imagesUrl = Object.assign({}, imagesUrl)
-                    //     // console.log('this.currentProduct.imagesUrl', this.currentProduct.imagesUrl, 'imagesUrl', imagesUrl)
-                    //     // console.log('this.currentProduct.imagesUrl', this.currentProduct.imagesUrl)
-                    // }
                 }
 
-                this.currentProduct
                 this.initCurrentProduct = JSON.parse(
                     JSON.stringify(this.currentProduct)
                 );
-
-                console.log('currentProduct', this.currentProduct)
             }
         },
         currentProduct: {
@@ -161,6 +95,26 @@ export default {
         }
     },
     methods: {
+        setDefaultCurrentProduct(){
+            const imagesUrl = {};
+            for (let i = 0; i < 5; i++) {
+                imagesUrl[`img${i + 1}`] = '';
+            }
+            
+            this.currentProduct = {
+                title: '',
+                category: '',
+                AD_type: '',
+                origin_price: null,
+                price: null,
+                unit: '',
+                description: '',
+                content: '',
+                imageUrl: '',
+                imagesUrl,
+                is_enabled: 1,
+            };
+        },
         openModal() {
             productModal.show();
         },
@@ -188,11 +142,9 @@ export default {
                 }
             });
         },
-        delImagesUrlItem(key) {
-            if (this.currentProduct.imagesUrl.hasOwnProperty(key)) {
-                delete this.currentProduct.imagesUrl[key];
-                delete this.isInputErr.imagesUrl[key];
-            }
+        removeImagesUrlItemData(key) {
+            this.currentProduct.imagesUrl[key] = '';
+            this.isInputErr.imagesUrl[key] = false;
         },
         addOrEditProduct() {
             this.isLoading = true;
@@ -216,11 +168,7 @@ export default {
                     });
             }
         },
-        timestamp() {
-            return new Date().getTime();
-        },
         handleChildUploadData(data){
-            console.log(data)
             const { dataKey, isInputErr, uploadImgUrl } = data;
             if(dataKey === 'imageUrl'){
                 this.currentProduct.imageUrl = uploadImgUrl;
@@ -228,24 +176,6 @@ export default {
             }else{
                 this.currentProduct.imagesUrl[dataKey] = uploadImgUrl;
                 this.isInputErr.imagesUrl[dataKey] = isInputErr;
-                
-                this.addImagesUrlItem();
-            }
-
-            console.log('this.isInputErr', this.isInputErr, 'this.currentProduct', this.currentProduct)
-        },
-        addImagesUrlItem(){
-            const allImagesUrl = Object.values(this.currentProduct.imagesUrl);
-            if(5 > allImagesUrl.length){
-                // 全部 imagesUrl 都有資料，再新增一個新的 imagesUrl
-                const allhaveData = allImagesUrl.every(url => url);
-                const allDataPass = Object.values(this.isInputErr.imagesUrl).every(isErr => !isErr);
-                console.log('allhaveData', allhaveData, 'allDataPass', allDataPass)
-                
-                if(allhaveData && allDataPass){
-                    const timestamp = this.timestamp();
-                    this.currentProduct.imagesUrl[timestamp] = '';
-                }
             }
         }
     },
@@ -337,9 +267,9 @@ export default {
                                     v-if="formsSchema.product_imagesUrl.validates.isRequired">*
                                 </span>
                             </label>
-                            <div class="col-auto mt-0 flex-column" v-for="(item, key) in currentProduct.imagesUrl" :key="key" :class="item.show ? 'd-flex' : 'd-none'">
-                                <upload-img :data-key="key" :image-url="item.imageUrl" @update-image="handleChildUploadData"></upload-img>
-                                <button type="button" class="btn btn-link btn-sm text-danger text-decoration-none" @click="delImagesUrlItem(key)" v-if="Object.keys(currentProduct.imagesUrl).length > 1 && imageUrl">刪除</button>
+                            <div class="col-auto mt-0 d-flex flex-column" v-for="(imageUrl, key) in currentProduct.imagesUrl" :key="key">
+                                <upload-img :data-key="key" :image-url="imageUrl" @update-image="handleChildUploadData"></upload-img>
+                                <button type="button" class="btn btn-link btn-sm text-danger text-decoration-none" @click="removeImagesUrlItemData(key)" v-if="imageUrl && imagesUrlHasDataTotal !== 0">刪除</button>
                             </div>
                         </div>
                         <div class="row g-3 pb-3">

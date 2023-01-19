@@ -123,10 +123,11 @@
         </div>
 
         <!-- modal 刪除 -->
-        <del-product-modal :product="currentProduct" @get-products="getProducts"></del-product-modal>
+        <del-product-modal ref="childDelProductModal" :product="currentProduct"
+            @get-products="getProducts"></del-product-modal>
 
         <!-- modal 新增或修改 -->
-        <product-modal :product="currentProduct" @get-products="getProducts"></product-modal>
+        <product-modal ref="childProductModal" :product="currentProduct" @get-products="getProducts"></product-modal>
     </div>
 
     <script src="https://kit.fontawesome.com/e977eaa2d8.js" crossorigin="anonymous"></script>
@@ -194,11 +195,41 @@
                     });
             },
             openModal(method, product) {
-                this.currentProduct = product;
+                this.currentProduct = { ...product };
+                // this.currentProduct = {
+                //     title: '',
+                //     category: '',
+                //     AD_type: '',
+                //     origin_price: null,
+                //     price: null,
+                //     unit: '',
+                //     description: '',
+                //     content: '',
+                //     imageUrl: '',
+                //     imagesUrl: {},
+                //     is_enabled: 1,
+                // };
+
+                // const keys = Object.keys(this.currentProduct);
+                // keys.forEach(key => {
+                //     if (key !== 'imagesUrl') {
+                //         this.currentProduct[key] = product[key];
+                //     } else {
+                //         for (let i = 0; i < 5; i++) {
+                //             const imageUrl = product.imagesUrl ? product.imagesUrl[i] : '';
+                //             const addimagesUrlItem = {
+                //                 show: imageUrl ? true : false,
+                //                 imageUrl
+                //             };
+                //             this.currentProduct.imagesUrl[`img${i + 1}`] = addimagesUrlItem;
+                //         }
+                //     }
+                // });
+
                 if (method === 'del') {
-                    delProductModal.methods.openModal();
+                    this.$refs.childDelProductModal.openModal();
                 } else {
-                    productModal.methods.openModal();
+                    this.$refs.childProductModal.openModal();
                 }
             },
             getIs_enabledLabelName(is_enabled) {

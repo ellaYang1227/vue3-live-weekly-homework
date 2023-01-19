@@ -22,45 +22,98 @@ export default {
             document.getElementById('productModal'),
             { keyboard: false }
         );
+
+        this.isInputErr = {};
+        const imagesUrl = {};
+        for (let i = 0; i < 5; i++) {
+            imagesUrl[`img${i + 1}`] = { 
+                show: i === 0 ? true : false,
+                imageUrl: ''
+            };
+        }
+        
+        this.currentProduct = {
+            title: '',
+            category: '',
+            AD_type: '',
+            origin_price: null,
+            price: null,
+            unit: '',
+            description: '',
+            content: '',
+            imageUrl: '',
+            imagesUrl,
+            is_enabled: 1,
+        };
+
+        console.log('this.currentProduct', this.currentProduct)
     },
     watch: {
         product: {
             handler() {
                 console.log('product', this.product)
                 const timestamp = this.timestamp();
-                this.isInputErr = {};
-                this.currentProduct = {
-                    title: '',
-                    category: '',
-                    AD_type: '',
-                    origin_price: null,
-                    price: null,
-                    unit: '',
-                    description: '',
-                    content: '',
-                    imageUrl: '',
-                    imagesUrl: {
-                        [timestamp]: ''
-                    },
-                    is_enabled: 1,
-                };
+                // this.isInputErr = {};
+                // this.currentProduct = {
+                //     title: '',
+                //     category: '',
+                //     AD_type: '',
+                //     origin_price: null,
+                //     price: null,
+                //     unit: '',
+                //     description: '',
+                //     content: '',
+                //     imageUrl: '',
+                //     imagesUrl: {
+                //         [`${timestamp}0`]: '',
+                //         [`${timestamp}1`]: '',
+                //         [`${timestamp}2`]: '',
+                //         [`${timestamp}3`]: '',
+                //         [`${timestamp}4`]: ''
+                //     },
+                //     is_enabled: 1,
+                // };
 
                 if(this.product){
-                    this.currentProduct = { ...this.product };
-                    if (!this.currentProduct.imagesUrl) {
-                        this.currentProduct.imagesUrl = { [timestamp]: '' };
-                    } else {
-                        this.currentProduct.imagesUrl =
-                            this.product.imagesUrl.reduce(
-                                (accumulator, currentValue, currentIndex) => {
-                                    accumulator[currentIndex] = currentValue;
-                                    return accumulator;
-                                },
-                                {}
-                            );
-                    }
+                    const keys = Object.keys(this.currentProduct);
+                    keys.forEach(key => {
+                        if(key !== 'imagesUrl'){
+                            this.currentProduct[key] = this.product[key];
+                        }else{
+                            const imagesUrlKeys = Object.keys(this.currentProduct.imagesUrl);
+                            imagesUrlKeys.forEach((imagesUrlKey, index) => {
+                                const imageUrl = this.product.imagesUrl ? this.product.imagesUrl[index] : '';
+                                this.currentProduct.imagesUrl[imagesUrlKey].imageUrl = imageUrl;
+                                this.currentProduct.imagesUrl[imagesUrlKey].show = imageUrl ? true : false;
+                            });
+                        }
+                    });
+                    // console.log(this.currentProduct)
+                    // this.currentProduct = { ...this.product };
+                    // if (!this.currentProduct.imagesUrl) {
+                    //     //this.currentProduct.imagesUrl = { [timestamp]: '' };
+                    // } else {
+                    //     console.log(this.currentProduct)
+                    //     this.currentProduct.imagesUrl =
+                    //         this.product.imagesUrl.reduce(
+                    //             (accumulator, currentValue, currentIndex) => {
+                    //                 accumulator[currentIndex] = currentValue;
+                    //                 return accumulator;
+                    //             },
+                    //             {}
+                    //         );
+                    //     const imagesUrl = this.product.imagesUrl.reduce((accumulator, currentValue, currentIndex) => {
+                    //         accumulator[currentIndex] = currentValue;
+                    //         return accumulator;
+                    //     },{});
+
+                    //     this.currentProduct.imagesUrl = Object.assign({}, imagesUrl)
+                    //     // console.log('this.currentProduct.imagesUrl', this.currentProduct.imagesUrl, 'imagesUrl', imagesUrl)
+                    //     // console.log('this.currentProduct.imagesUrl', this.currentProduct.imagesUrl)
+                    // }
                 }
 
+                this.currentProduct
                 this.initCurrentProduct = JSON.parse(
                     JSON.stringify(this.currentProduct)
                 );
@@ -284,8 +337,8 @@ export default {
                                     v-if="formsSchema.product_imagesUrl.validates.isRequired">*
                                 </span>
                             </label>
-                            <div class="col-auto mt-0 d-flex flex-column" v-for="(imageUrl, key) in currentProduct.imagesUrl" :key="key">
-                                <upload-img :data-key="key" :image-url="imageUrl" @update-image="handleChildUploadData"></upload-img>
+                            <div class="col-auto mt-0 flex-column" v-for="(item, key) in currentProduct.imagesUrl" :key="key" :class="item.show ? 'd-flex' : 'd-none'">
+                                <upload-img :data-key="key" :image-url="item.imageUrl" @update-image="handleChildUploadData"></upload-img>
                                 <button type="button" class="btn btn-link btn-sm text-danger text-decoration-none" @click="delImagesUrlItem(key)" v-if="Object.keys(currentProduct.imagesUrl).length > 1 && imageUrl">刪除</button>
                             </div>
                         </div>

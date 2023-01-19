@@ -99,7 +99,10 @@ export default {
         }
     },
     props:{
-        imageUrl: String,
+        imageUrl: {
+            type: String,
+            required: true,
+        },
         dataKey: {
             type: String,
             required: true,

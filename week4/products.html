@@ -158,10 +158,16 @@
                 axios.post(`${url}/api/user/check`)
                     .then(res => { this.getProducts() })
                     .catch(error => {
-                        console.dir(error);
-                        // 清除 cookie
-                        document.cookie = `${path}-token=${token}; max-age=0`;
-                        location.href = './login.html';
+                        // console.dir(error);
+                        swalWithBootstrapButtons.fire({
+                            icon: 'error',
+                            title: '驗證失敗',
+                            text: '您的身分驗證失敗，請重新登入'
+                        }).then(result => {
+                            // 清除 cookie
+                            document.cookie = `${path}-token=${token}; max-age=0`;
+                            location.href = './login.html';
+                        });
                     });
             },
             getProducts(page) {
@@ -175,7 +181,7 @@
                         };
                     })
                     .catch(error => {
-                        console.dir(error);
+                        // console.dir(error);
                         swalWithBootstrapButtons.fire({
                             icon: 'error',
                             title: error.response.data.message

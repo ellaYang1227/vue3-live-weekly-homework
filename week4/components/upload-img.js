@@ -11,6 +11,9 @@ export default {
             isLoading: false
         }
     },
+    mounted() {
+        this.uploadImgUrl = this.imageUrl;
+    },
     watch:{
         imageUrl(){
             this.uploadImgUrl = this.imageUrl;
@@ -60,7 +63,7 @@ export default {
                     }
                 })
                 .catch(error => {
-                    console.dir(error);
+                    // console.dir(error);
                     this.setSwalError(error.response.data.message);
                 });
         },

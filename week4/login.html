@@ -22,8 +22,8 @@
                         <div class="card-body py-4">
                             <h5 class="card-title h4 mb-3 text-muted">{{ title }}</h5>
                             <div class="mb-3">
-                                <label for="usernameInput" class="form-label">{{ formsSchema.username.name }}<font
-                                        class="text-danger" v-if="formsSchema.username.validates.isRequired">*</font>
+                                <label for="usernameInput" class="form-label">{{ formsSchema.username.name }}<span
+                                        class="text-danger" v-if="formsSchema.username.validates.isRequired">*</span>
                                 </label>
                                 <input :type="formsSchema.username.type" class="form-control" id="usernameInput"
                                     v-model.trim="username" :required="formsSchema.username.validates.isRequired"
@@ -32,8 +32,8 @@
                                     formsSchema.username.error }}</div>
                             </div>
                             <div class="mb-3">
-                                <label for="passwordInput" class="form-label">{{ formsSchema.password.name }}<font
-                                        class="text-danger" v-if="formsSchema.password.validates.isRequired">*</font>
+                                <label for="passwordInput" class="form-label">{{ formsSchema.password.name }}<span
+                                        class="text-danger" v-if="formsSchema.password.validates.isRequired">*</span>
                                 </label>
                                 <input :type="formsSchema.password.type" class="form-control" id="passwordInput"
                                     v-model.trim="password" :required="formsSchema.password.validates.isRequired"
@@ -97,7 +97,7 @@
                         this.goToProducts();
                     })
                     .catch(error => {
-                        console.dir(error);
+                        // console.dir(error);
                         const errMsg = error.response.data.error.message;
                         let err = '';
                         if (errMsg.match('user may have been deleted')) {

@@ -155,7 +155,7 @@ export default {
                     .post(`${url}/api/${path}/admin/product`, data)
                     .then(res => { this.closeModal('success', res.data.message) })
                     .catch(error => {
-                        console.dir(error);
+                        // console.dir(error);
                         this.closeModal('error', error.response.data.message);
                     });
             } else {
@@ -163,7 +163,7 @@ export default {
                     .put(`${url}/api/${path}/admin/product/${this.currentProduct.id}`, data)
                     .then(res => { this.closeModal('success', res.data.message) })
                     .catch(error => {
-                        console.dir(error);
+                        // console.dir(error);
                         this.closeModal('error', error.response.data.message);
                     });
             }

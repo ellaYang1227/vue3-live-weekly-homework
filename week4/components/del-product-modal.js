@@ -39,7 +39,7 @@ export default {
                 .delete(`${url}/api/${path}/admin/product/${this.product.id}`)
                 .then(res => {this.closeModal('success', res.data.message)})
                 .catch((error) => {
-                    console.dir(error);
+                    // console.dir(error);
                     this.closeModal('error', error.response.data.message);
                 });
         }
@@ -60,7 +60,7 @@ export default {
                     aria-label="Close" :disabled="isLoading"></button>
             </div>
             <div class="modal-body">
-                <p>請確認是否<strong></strong>刪除「{{ product?.title }}」產品</strong>，刪除後您再也無法復原？
+                <p>請確認是否<strong>刪除「{{ product?.title }}」產品</strong>，刪除後您再也無法復原？
                 </p>
             </div>
             <div class="modal-footer">

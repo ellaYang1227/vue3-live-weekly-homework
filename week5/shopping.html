@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商城｜第五週 - 進階語法介紹</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- VeeValiadation -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/vee-validate/4.5.8/vee-validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@vee-validate/rules@4.5.8/dist/vee-validate-rules.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@vee-validate/i18n@4.5.8/dist/vee-validate-i18n.min.js"></script> -->
+    <!-- vue loading -->
+    <script src="https://cdn.jsdelivr.net/npm/vue-loading-overlay@6.0.2/dist/index.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/vue-loading-overlay@6.0.2/dist/css/index.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="py-5" id="app">
+        <loading v-model:active="isLoading"></loading>
+        <div class="container">
+            <div class="col-md-7">
+                <h1 class="mb-0 h4 fw-bold bg-light p-2">產品</h1>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover text-center align-middle">
+                        <!-- <thead>
+                            <tr>
+                                <th scope="col" width="200px">產品名稱</th>
+                                <th scope="col" width="120px">分類</th>
+                                <th scope="col" width="120px">原價</th>
+                                <th scope="col" width="120px">售價</th>
+                                <th scope="col" width="150px"></th>
+                            </tr>
+                        </thead> -->
+                        <tbody>
+                            <tr v-for="product in products.data" :key="product.id">
+                                <th>
+                                    <div class="d-flex align-items-center">
+                                        <img :src="product.imageUrl" :alt="`${product.category} - ${product.title}`"
+                                            class="img-box flex-shrink-0 rounded border me-2">
+                                        <h4 class="h6 mb-0 text-truncate fw-bold">{{ product.title }}</h4>
+                                    </div>
+                                </th>
+                                <td scope="row" class="text-truncate">{{ product.category }}</td>
+                                <td class="text-end">${{ product.origin_price }}</td>
+                                <td class="text-end">${{ product.price }}</td>
+                                <td>
+                                    <button type="button" class="btn btn-outline-primary btn-sm"
+                                        @click="openModal('edit', product)">編輯</button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm ms-1"
+                                        @click="openModal('del', product)">刪除</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="module">
+    import { url, path } from '../data/data.js';
+    import { formsSchema } from '../data/forms-schema.js';
+    import { swalWithBootstrapButtons } from '../data/sweetalert2.js';
+
+    const { createApp } = Vue;
+
+    const app = createApp({
+        data() {
+            return {
+                isLoading: false,
+                products: []
+            }
+        },
+        watch: {
+            handleProducts() {
+                return this.products;
+            }
+        },
+        mounted() {
+            this.getProducts();
+        },
+        methods: {
+            getProducts() {
+                this.isLoading = true;
+                axios.get(`${url}/api/${path}/products/all`)
+                    .then(res => {
+                        this.isLoading = false;
+                        this.products = res.data.products;
+                        console.log(res.data.products);
+                    }).catch(error => {
+                        // console.dir(error);
+                        swalWithBootstrapButtons.fire({
+                            icon: 'error',
+                            //title: error.response.data.message
+                        });
+                    });
+            }
+        },
+    });
+
+
+
+    console.log(VueLoading)
+
+    //app.use(VueLoading.LoadingPlugin);
+    app.component('loading', VueLoading.Component)
+    app.mount('#app');
+</script>
+
+</html>

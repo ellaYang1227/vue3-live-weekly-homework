@@ -55,7 +55,6 @@
     }
 
     .cart-items {
-        max-height: 80vh;
         overflow-y: auto;
     }
 
@@ -108,15 +107,18 @@
                         <div class="card-body">
                             <h5 class="card-title border-bottom pb-3 mb-0 d-flex align-items-center">我的購物車
                                 <button type="button" class="ms-auto btn btn-outline-danger btn-sm"
-                                    @click="delCart()">清空購物車</button>
+                                    :disabled="!cart.carts?.length" @click="delCart()">清空購物車</button>
                             </h5>
-                            <div class="d-flex flex-column" v-if="cart.carts?.length">
-                                <ul class="list-group list-group-flush bg-transparent cart-items">
-                                    <li class="list-group-item py-3" v-for="(cartItem) in cart.carts" :key="cartItem.id"
-                                        @click.stop="openProductModal(cartItem.product)">
+                            <p class="text-muted text-center mb-0 py-3" v-if="!cart.carts?.length">購物車是空的<br />立即選購喜愛的產品
+                            </p>
+                            <div class="d-flex flex-column" v-else>
+                                <ul class="list-group list-group-flush bg-transparent overflow-auto"
+                                    :style="cartItemsMaxHeight">
+                                    <li class="list-group-item py-3" v-for="(cartItem) in cart.carts"
+                                        :key="cartItem.id">
                                         <div class="row align-items-center">
                                             <div class="col-7 d-flex align-items-center">
-                                                <button type="button" class="btn btn-link text-black-50"><i
+                                                <button type="button" class="btn btn-link text-black-50 ps-0"><i
                                                         class="fa-solid fa-trash-can"
                                                         @click="delCart(cartItem.id)"></i></button>
                                                 <h3 class="h6 mb-0 fw-bold">{{ cartItem.product.title }}</h3>
@@ -134,11 +136,15 @@
                                         </div>
                                     </li>
                                 </ul>
-                                <div class="p-3 mt-auto border-top d-flex align-items-center text-black-50">{{
+                                <div class="p-3 pb-0 mt-auto border-top d-flex align-items-center text-black-50">{{
                                     `共 ${cart.carts.length} 筆` }}<strong class="ms-auto text-danger">總計 ${{
                                         cart.final_total }}</strong></div>
+                                <button class="btn btn-primary w-100 mt-3" type="button" @click="toggleBuyFormCollapse"
+                                    v-if="!showBuyFormCollapse">立即結帳</button>
                             </div>
-                            <p class="text-muted text-center mb-0 py-3" v-else>購物車是空的<br />立即選購喜愛的產品</p>
+                        </div>
+                        <div class="collapse card-footer py-3" ref="buyFormCollapse">
+                            <buy-form @get-cart="getCart(); toggleBuyFormCollapse()"></buy-form>
                         </div>
                     </div>
                 </div>
@@ -157,19 +163,20 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- VeeValiadation -->
-<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/vee-validate/4.5.8/vee-validate.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@vee-validate/rules@4.5.8/dist/vee-validate-rules.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@vee-validate/i18n@4.5.8/dist/vee-validate-i18n.min.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vee-validate/4.5.8/vee-validate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@vee-validate/rules@4.5.8/dist/vee-validate-rules.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@vee-validate/i18n@4.5.8/dist/vee-validate-i18n.min.js"></script>
 <!-- vue loading -->
 <script src="https://cdn.jsdelivr.net/npm/vue-loading-overlay@6.0.2/dist/index.min.js"></script>
 
 <script type="module">
     import { url, path } from '../data/data.js';
-    import { formsSchema } from '../data/forms-schema.js';
     import { swalWithBootstrapButtons, swalToast } from '../data/sweetalert2.js';
     import productModal from './components/product-modal.js';
+    import buyForm from './components/buy-form.js';
 
     const { createApp } = Vue;
+    let buyFormCollapse = null;
 
     const app = createApp({
         data() {
@@ -177,11 +184,16 @@
                 isLoading: false,
                 products: [],
                 cart: {},
-                currentProduct: {}
+                currentProduct: {},
+                showBuyFormCollapse: false,
+                cartItemsMaxHeight: {
+                    maxHeight: '80vh'
+                }
             }
         },
         components: {
-            productModal
+            productModal,
+            buyForm
         },
         computed: {
             handleProducts() {
@@ -207,6 +219,7 @@
             }
         },
         mounted() {
+            buyFormCollapse = new bootstrap.Collapse(this.$refs.buyFormCollapse, { toggle: false });
             this.getProducts();
             this.getCart();
         },
@@ -297,10 +310,8 @@
                 }
             },
             openProductModal(product) {
-                console.log(product)
                 this.currentProduct = { ...product };
                 this.$refs.childProductModal.openProductModal();
-                // refs
             },
             showSwalErr(message, swalStype = 'popup') {
                 this.isLoading = false;
@@ -315,11 +326,20 @@
                         title: message
                     });
                 }
+            },
+            toggleBuyFormCollapse() {
+                buyFormCollapse.toggle();
+                this.showBuyFormCollapse = !this.showBuyFormCollapse;
+                this.cartItemsMaxHeight.maxHeight = this.showBuyFormCollapse ? '20vh' : '80vh';
             }
         },
     });
 
+
     app.component('loading', VueLoading.Component);
+    app.component('VForm', VeeValidate.Form);
+    app.component('VField', VeeValidate.Field);
+    app.component('ErrorMessage', VeeValidate.ErrorMessage);
     app.mount('#app');
 </script>
 

@@ -10,3 +10,11 @@ export const swalWithBootstrapButtons = Swal.mixin({
     timer: 3000,
     timerProgressBar: true
 });
+
+export const swalToast = Swal.mixin({
+    toast: true,
+    showConfirmButton: false,
+    position: 'bottom-end',
+    timer: 3000,
+    timerProgressBar: true
+});

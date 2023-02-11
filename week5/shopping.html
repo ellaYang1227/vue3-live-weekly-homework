@@ -240,9 +240,9 @@
                             swalToast.fire({
                                 icon: 'success',
                                 title: '已加入購物車'
-                            }).then(result => {
-                                this.getCart();
                             });
+
+                            this.getCart();
                         }).catch(error => {
                             // console.dir(error);
                             this.showSwalErr('加入購物車失敗', 'toast');

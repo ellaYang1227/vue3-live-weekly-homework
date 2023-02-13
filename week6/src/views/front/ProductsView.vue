@@ -1,15 +1,22 @@
 <script>
-import { LoadingStore } from "../../stores/LoadingStore.js";
+import { RouterLink } from "vue-router";
 import { mapActions } from "pinia";
+
+import { LoadingStore } from "../../stores/LoadingStore.js";
+import { CartStore } from "../../stores/CartStore.js";
+import { getHowPriceLess } from "../../data/functions.js";
 const { VITE_API_URL, VITE_API_PATH } = import.meta.env;
 
 export default {
     data() {
         return {
-            products: []
+            products: [],
+            getHowPriceLess
         };
     },
-    components: {},
+    components: {
+        RouterLink
+    },
     mounted() {
         this.getProducts();
     },
@@ -38,48 +45,54 @@ export default {
     },
     methods: {
         ...mapActions(LoadingStore, ["showLoading", "hideLoading"]),
+        ...mapActions(CartStore, ["addCart"]),
         getProducts() {
-            //this.isLoading = true;
             this.$http
                 .get(`${VITE_API_URL}/api/${VITE_API_PATH}/products/all`)
                 .then(res => {
-                    console.error('未安裝 Swal 套件')
                     this.hideLoading();
                     this.products = res.data.products;
                 })
                 .catch(error => {
                     // console.dir(error);
-
                     this.hideLoading();
-                    this.showSwalErr(error.response.data.message);
+                    this.$refs.sweetalert.showSwal("popup", "error", error.response.data.message);
                 });
-        },
-        getHowPriceLess(origin_price, price) {
-            return origin_price - price;
         }
     }
 };
 </script>
 
 <template>
-    <div class="container" v-for="item in handleProducts" :key="item.category">
-        <h1 class="h5 fw-bold bg-light px-2 py-3">{{ item.category }}</h1>
-        <div class="row row-cols-1 row-cols-md-2 g-4">
-            <div class="col" v-for="product in item.products" :key="product.id">
-                <div class="card">
-                    <img :src="product.imageUrl" :alt="`${product.category} - ${product.title}`" class="card-img-top" />
-                    <div class="card-body">
-                        <h5 class="card-title fw-bold">{{ product.title }}</h5>
-                        <p class="card-text">{{ product.price }}</p>
-                        <div class="text-danger fw-bold">
-                            ${{ product.price
-                            }}<small class="d-block text-black-50" v-if="getHowPriceLess(product.origin_price, product.price)"
-                                >現省 ${{ getHowPriceLess(product.origin_price, product.price) }}</small
-                            >
+    <sweetalert-component ref="sweetalert"></sweetalert-component>
+    <div class="container">
+        <div class="pb-5" v-for="item in handleProducts" :key="item.category">
+            <h1 class="h5 fw-bold bg-light px-2 py-3">{{ item.category }}</h1>
+            <div class="row row-cols-1 row-cols-md-3 row-cols-xl-4 g-4">
+                <div class="col" v-for="product in item.products" :key="product.id">
+                    <div class="card bg-light h-100">
+                        <div class="bg-white text-center img-box p-3">
+                            <img :src="product.imageUrl" :alt="`${product.category} - ${product.title}`" class="img-object-fit-cover card-img-top" />
                         </div>
-                        <div class="d-grid gap-2 d-md-block">
-                            <button type="button" class="btn btn-outline-primary btn-sm" @click="openProductModal(product)">產品詳情</button>
-                            <button type="button" class="btn btn-outline-danger btn-sm" @click="addCart(product.id)">加入購物車</button>
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">{{ product.title }}</h5>
+                            <div class="text-danger fw-bold">
+                                ${{ product.price
+                                }}<small class="d-block text-black-50" v-if="getHowPriceLess(product.origin_price, product.price)"
+                                    >現省 ${{ getHowPriceLess(product.origin_price, product.price) }}</small
+                                >
+                            </div>
+                        </div>
+                        <div class="card-footer pb-4 d-flex bg-transparent border-0">
+                            <router-link
+                                :to="`/product/${product.id}`"
+                                role="button"
+                                class="btn btn-outline-primary btn-sm flex-grow-1 flex-shrink-0 me-2"
+                                >產品詳情</router-link
+                            >
+                            <button type="button" class="btn btn-outline-danger btn-sm flex-grow-1 flex-shrink-0" @click="addCart(product.id)">
+                                加入購物車
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -88,4 +101,9 @@ export default {
     </div>
 </template>
 
-<style lang="scss"></style>
+<style lang="scss">
+.img-box {
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+}
+</style>

@@ -1,2 +1,16 @@
 @import "./bootstrap-variables";
 @import "bootstrap/scss/bootstrap";
+// @import "./sweetalert2-variables";
+// @import "sweetalert2/src/sweetalert2";
+
+.fixed-top-margin-top {
+    margin-top: $navbar-height;
+}
+
+.img-object-fit-cover {
+    object-fit: cover;
+}
+
+.white-space-pre-wrap {
+    white-space: pre-wrap;
+}

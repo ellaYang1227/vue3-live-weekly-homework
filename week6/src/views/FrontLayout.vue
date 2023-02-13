@@ -15,7 +15,9 @@ export default {
 
 <template>
     <NavbarComponent layout="front" />
-    <RouterView />
+    <div class="py-5 fixed-top-margin-top">
+        <RouterView />
+    </div>
 </template>
 
 <style lang="scss"></style>

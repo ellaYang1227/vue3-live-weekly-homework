@@ -61,9 +61,9 @@ export default {
 </script>
 
 <template>
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top navbar-height">
         <div class="container">
-            <RouterLink :to="currentData.brand.url" class="navbar-brand">{{ currentData.brand.name }}</RouterLink>
+            <router-link :to="currentData.brand.url" class="navbar-brand">{{ currentData.brand.name }}</router-link>
             <button
                 class="navbar-toggler"
                 type="button"
@@ -77,13 +77,21 @@ export default {
             </button>
             <div class="collapse navbar-collapse">
                 <div class="navbar-nav ms-auto">
-                    <RouterLink :to="navLink.url" class="nav-link" v-for="navLink in currentData.navLinks" :key="navLink.name">{{
+                    <router-link :to="navLink.url" class="nav-link" v-for="navLink in currentData.navLinks" :key="navLink.name">{{
                         navLink.name
-                    }}</RouterLink>
+                    }}</router-link>
                 </div>
-                <RouterLink to="/login" class="btn btn-outline-warning ms-2">登入</RouterLink>
+                <router-link to="/login" class="btn btn-outline-warning ms-2">登入</router-link>
                 <button type="button" class="btn btn-outline-light ms-2">登出</button>
             </div>
         </div>
     </nav>
 </template>
+
+<style lang="scss">
+@import "../assets/bootstrap-variables.scss";
+
+.navbar-height {
+    height: $navbar-height;
+}
+</style>

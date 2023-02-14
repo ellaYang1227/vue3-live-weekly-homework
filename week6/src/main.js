@@ -23,7 +23,7 @@ Object.keys(AllRules).forEach(rule => {
 
 /* 加入多國語系 */
 // 讀取外部的資源
-loadLocaleFromURL("/zh_TW.json");
+loadLocaleFromURL("./assets/zh_TW.json");
 
 // Activate the locale
 configure({

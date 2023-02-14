@@ -2,7 +2,7 @@
 import { Form, Field, ErrorMessage } from "vee-validate";
 import { mapActions } from "pinia";
 import { LoadingStore } from "../../stores/LoadingStore.js";
-import { getToken } from "../../data/functions.js";
+import { AuthStore } from "../../stores/AuthStore.js";
 import SweetalertComponent from "../../components/SweetalertComponent.vue";
 const { VITE_API_URL, VITE_API_PATH } = import.meta.env;
 const adminProductsUrl = "/admin/products";
@@ -18,6 +18,7 @@ export default {
         };
     },
     beforeRouteEnter(to, from, next) {
+        const { getToken } = AuthStore();
         if (!getToken()) {
             next();
         } else {
@@ -102,6 +103,7 @@ export default {
                                     v-model="user.password"
                                 ></Field>
                                 <ErrorMessage name="密碼" class="invalid-feedback"></ErrorMessage>
+                                <div class="invalid-feedback d-block text-muted" v-if="!errors['密碼']">密碼需至少 8 碼以上，並英數混合</div>
                             </div>
                             <button type="submit" class="btn btn-primary w-100 mt-3">{{ title }}</button>
                         </Form>

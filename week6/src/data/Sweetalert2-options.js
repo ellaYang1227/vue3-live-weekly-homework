@@ -21,8 +21,8 @@ const swalToastOptions = {
     timerProgressBar: true
 };
 
-function showSwal(swalStype, icon, title) {
-    const addOptions = { icon, title };
+function showSwal(swalStype, icon, title, text) {
+    const addOptions = { icon, title, text };
     if (swalStype === "popup") {
         Swal.fire({ ...swalPopupOptions, ...addOptions });
     } else if (swalStype === "toast") {

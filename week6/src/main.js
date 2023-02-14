@@ -14,7 +14,6 @@ import { far } from "@fortawesome/free-regular-svg-icons";
 import { fab } from "@fortawesome/free-brands-svg-icons";
 import { defineRule, configure } from "vee-validate";
 import AllRules from "@vee-validate/rules";
-//import { required } from "@vee-validate/rules";
 import { localize, loadLocaleFromURL } from "@vee-validate/i18n";
 
 /* VeeValidate 定義規則 */

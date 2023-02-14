@@ -6,12 +6,11 @@ export default {
         return {};
     },
     methods: {
-        showSwal(swalStype, icon, title) {
-            const addOptions = { icon, title };
+        showSwal(swalStype, icon, title, text) {
+            const addOptions = { icon, title, text };
             if (swalStype === "popup") {
                 this.$swal({ ...swalPopupOptions, ...addOptions });
             } else if (swalStype === "toast") {
-                console.log(this);
                 this.$swal({ ...swalToastOptions, ...addOptions });
             }
         }

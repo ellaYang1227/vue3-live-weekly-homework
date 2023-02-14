@@ -1,5 +1,7 @@
 <script>
+import { mapActions } from "pinia";
 import { RouterLink } from "vue-router";
+import { AuthStore } from "../stores/AuthStore.js";
 
 export default {
     data() {
@@ -18,25 +20,32 @@ export default {
                         {
                             name: "購物車",
                             url: "/cart"
+                        },
+                        {
+                            name: "後台管理",
+                            url: "/admin/products"
                         }
                     ]
                 },
                 admin: {
                     brand: {
                         name: "[後台管理] week6 作業",
-                        url: "/admin/products",
-                        navLinks: [
-                            {
-                                name: "產品列表",
-                                url: "/admin/products"
-                            },
-                            {
-                                name: "訂單管理",
-                                url: "/admin/orders"
-                            }
-                        ]
+                        url: "/admin/products"
                     },
-                    navLinks: []
+                    navLinks: [
+                        {
+                            name: "產品列表",
+                            url: "/admin/products"
+                        },
+                        {
+                            name: "訂單管理",
+                            url: "/admin/orders"
+                        },
+                        {
+                            name: "前台",
+                            url: "/products"
+                        }
+                    ]
                 }
             }
         };
@@ -56,6 +65,9 @@ export default {
             const { front, admin } = this.data;
             return this.layout === "admin" ? admin : front;
         }
+    },
+    methods: {
+        ...mapActions(AuthStore, ["logout", "getToken"])
     }
 };
 </script>
@@ -81,8 +93,8 @@ export default {
                         navLink.name
                     }}</router-link>
                 </div>
-                <router-link to="/login" class="btn btn-outline-warning ms-2">登入</router-link>
-                <button type="button" class="btn btn-outline-light ms-2">登出</button>
+                <router-link to="/login" class="btn btn-outline-warning ms-2" v-if="!getToken()">登入</router-link>
+                <button type="button" class="btn btn-outline-light ms-2" @click="logout()" v-else>登出</button>
             </div>
         </div>
     </nav>

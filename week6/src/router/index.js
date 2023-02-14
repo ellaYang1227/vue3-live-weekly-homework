@@ -2,28 +2,11 @@ import { createRouter, createWebHashHistory } from "vue-router";
 
 const routes = [
     {
-        path: "/admin",
-        component: () => import("../views/AdminLayout.vue"),
-        children: [
-            {
-                path: "/products",
-                name: "產品列表",
-                component: () => import("../views/admin/AdminProductsView.vue")
-            },
-            {
-                path: "/orders",
-                name: "訂單管理",
-                component: () => import("../views/admin/AdminOrdersView.vue")
-            },
-            { path: "/:pathMatch(.*)*", redirect: "/admin/products" }
-        ]
-    },
-    {
         path: "/",
         component: () => import("../views/FrontLayout.vue"),
         children: [
             {
-                path: "/Products",
+                path: "/products",
                 name: "產品列表",
                 component: () => import("../views/front/ProductsView.vue")
             },
@@ -42,7 +25,24 @@ const routes = [
                 name: "登入",
                 component: () => import("../views/front/LoginView.vue")
             },
-            { path: "/:pathMatch(.*)*", redirect: "/products" }
+            { path: ":pathMatch(.*)*", redirect: "/products" }
+        ]
+    },
+    {
+        path: "/admin",
+        component: () => import("../views/AdminLayout.vue"),
+        children: [
+            {
+                path: "products",
+                name: "產品列表",
+                component: () => import("../views/admin/AdminProductsView.vue")
+            },
+            {
+                path: "orders",
+                name: "訂單管理",
+                component: () => import("../views/admin/AdminOrdersView.vue")
+            },
+            { path: ":pathMatch(.*)*", redirect: "/admin/products" }
         ]
     },
     { path: "/:pathMatch(.*)*", redirect: "/products" }

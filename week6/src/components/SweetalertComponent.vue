@@ -8,21 +8,11 @@ export default {
     methods: {
         showSwal(swalStype, icon, title) {
             const addOptions = { icon, title };
-
-            console.log();
             if (swalStype === "popup") {
                 this.$swal({ ...swalPopupOptions, ...addOptions });
-                // swalWithBootstrapButtons.fire({
-                //     icon: "error",
-                //     title: message
-                // });
             } else if (swalStype === "toast") {
                 console.log(this);
                 this.$swal({ ...swalToastOptions, ...addOptions });
-                // swalToast.fire({
-                //     icon: "error",
-                //     title: message
-                // });
             }
         }
     }

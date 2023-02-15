@@ -3,7 +3,6 @@ import { Form, Field, ErrorMessage } from "vee-validate";
 import { mapActions } from "pinia";
 import { LoadingStore } from "../../stores/LoadingStore.js";
 import { AuthStore } from "../../stores/AuthStore.js";
-import SweetalertComponent from "../../components/SweetalertComponent.vue";
 const { VITE_API_URL, VITE_API_PATH } = import.meta.env;
 const adminProductsUrl = "/admin/products";
 
@@ -31,8 +30,7 @@ export default {
     components: {
         Form,
         Field,
-        ErrorMessage,
-        SweetalertComponent
+        ErrorMessage
     },
     methods: {
         ...mapActions(LoadingStore, ["showLoading", "hideLoading"]),
@@ -68,7 +66,7 @@ export default {
 </script>
 
 <template>
-    <sweetalert-component ref="sweetalert"></sweetalert-component>
+    <SweetalertComponent ref="sweetalert" />
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6 col-xl-4">

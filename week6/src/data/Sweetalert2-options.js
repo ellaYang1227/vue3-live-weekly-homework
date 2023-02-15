@@ -24,9 +24,9 @@ const swalToastOptions = {
 function showSwal(swalStype, icon, title, text) {
     const addOptions = { icon, title, text };
     if (swalStype === "popup") {
-        Swal.fire({ ...swalPopupOptions, ...addOptions });
+        return Swal.fire({ ...swalPopupOptions, ...addOptions });
     } else if (swalStype === "toast") {
-        Swal.fire({ ...swalToastOptions, ...addOptions });
+        return Swal.fire({ ...swalToastOptions, ...addOptions });
     }
 }
 

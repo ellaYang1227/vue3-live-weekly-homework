@@ -31,7 +31,9 @@ export default {
                 .catch(error => {
                     // console.dir(error);
                     this.hideLoading();
-                    this.$refs.sweetalert.showSwal("popup", "error", error.response.data.message);
+                    this.$refs.sweetalert.showSwal("popup", "error", error.response.data.message).then(() => {
+                        this.$router.go(-1);
+                    });
                 });
         }
     }
@@ -39,6 +41,7 @@ export default {
 </script>
 
 <template>
+    <SweetalertComponent ref="sweetalert" />
     <div class="container">
         <div class="row">
             <div class="col-md-4">

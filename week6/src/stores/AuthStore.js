@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import router from "../router/index.js";
 const { VITE_API_PATH } = import.meta.env;
 
 export const AuthStore = defineStore("AuthStore", {
@@ -7,7 +8,7 @@ export const AuthStore = defineStore("AuthStore", {
     actions: {
         logout() {
             this.removeToken();
-            location.href = "#/login";
+            router.push("/login");
         },
         getToken() {
             return document.cookie.replace(/(?:(?:^|.*;\s*)ella-diving-token\s*=\s*([^;]*).*$)|^.*$/, "$1");

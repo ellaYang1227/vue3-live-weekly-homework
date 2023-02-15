@@ -25,14 +25,13 @@ export default {
             })
             .catch(() => {
                 //console.dir(error);
-                showSwal("popup", "error", "驗證失敗", "您的身分驗證失敗，請重新登入");
                 removeToken();
                 const { hideLoading } = LoadingStore();
                 hideLoading();
 
-                setTimeout(() => {
+                showSwal("popup", "error", "驗證失敗", "您的身分驗證失敗，請重新登入").then(() => {
                     next("/login");
-                }, 1000);
+                });
             });
     }
 };

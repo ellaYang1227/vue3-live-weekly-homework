@@ -1,7 +1,6 @@
 <script>
 import { mapActions } from "pinia";
 import { LoadingStore } from "../../stores/LoadingStore.js";
-import SweetalertComponent from "../../components/SweetalertComponent.vue";
 import PaginationComponent from "../../components/PaginationComponent.vue";
 const { VITE_API_URL, VITE_API_PATH } = import.meta.env;
 
@@ -20,7 +19,6 @@ export default {
         this.getOrders();
     },
     components: {
-        SweetalertComponent,
         PaginationComponent
     },
     methods: {
@@ -73,7 +71,7 @@ export default {
 </script>
 
 <template>
-    <sweetalert-component ref="sweetalert"></sweetalert-component>
+    <SweetalertComponent ref="sweetalert" />
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h1 class="mb-0 h4 fw-bold">訂單管理</h1>

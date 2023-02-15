@@ -1,1 +1,0 @@
-import{bs as i}from"./_plugin-vue_export-helper-6502c603.js";const s=i("LoadingStore",{state:()=>({isLoading:!0}),actions:{showLoading(){this.isLoading=!0},hideLoading(){this.isLoading=!1}}});export{s as L};

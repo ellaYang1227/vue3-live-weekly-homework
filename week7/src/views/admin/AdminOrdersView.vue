@@ -1,19 +1,19 @@
 <script>
-import { mapActions } from "pinia";
-import { LoadingStore } from "../../stores/LoadingStore.js";
+import { mapActions, mapState } from "pinia";
+import { OrderStore } from "../../stores/OrderStore.js";
 import PaginationComponent from "../../components/PaginationComponent.vue";
 import OrderModal from "../../components/OrderModal.vue";
 import DelOrderModal from "../../components/DelOrderModal.vue";
-const { VITE_API_URL, VITE_API_PATH } = import.meta.env;
+import SwitchIsPaid from "../../components/SwitchIsPaid.vue";
 
 export default {
     data() {
         return {
-            orders: {},
             currentOrder: {}
         };
     },
     computed: {
+        ...mapState(OrderStore, ["orders"]),
         orderTotal() {
             return this.orders.data ? Object.keys(this.orders.data).length : 0;
         }
@@ -24,32 +24,11 @@ export default {
     components: {
         PaginationComponent,
         OrderModal,
-        DelOrderModal
+        DelOrderModal,
+        SwitchIsPaid
     },
     methods: {
-        ...mapActions(LoadingStore, ["showLoading", "hideLoading"]),
-        getOrders(page) {
-            this.showLoading();
-            if (!page) {
-                page = this.orders.pagination ? this.orders.pagination.current_page : 1;
-            }
-            this.$http
-                .get(`${VITE_API_URL}/api/${VITE_API_PATH}/admin/orders?page=${page}`)
-                .then(res => {
-                    const { orders, pagination } = res.data;
-                    this.orders = {
-                        data: orders,
-                        pagination
-                    };
-
-                    this.hideLoading();
-                })
-                .catch(error => {
-                    // console.dir(error);
-                    this.hideLoading();
-                    this.$refs.sweetalert.showSwal("popup", "error", error.response.data.message);
-                });
-        },
+        ...mapActions(OrderStore, ["getOrders"]),
         handleCreate_at(date) {
             date = new Date(date * 1000);
             const yesr = date.getFullYear();
@@ -79,7 +58,6 @@ export default {
             if (method === "del") {
                 this.$refs.childDelOrderModal.openModal();
             } else {
-                console.log(this.currentOrder)
                 this.$refs.childOrderModal.openModal();
             }
         }
@@ -122,7 +100,7 @@ export default {
                     </td>
                     <td class="text-end">${{ order.total }}</td>
                     <td>
-                        <strong :class="[order.is_paid ? 'text-success' : 'text-danger']">{{ order.is_paid ? "已付款" : "未付款" }}</strong>
+                        <SwitchIsPaid :order="order" :page="orders.pagination.current_page" />
                     </td>
                     <td>
                         <button type="button" class="btn btn-outline-primary btn-sm" @click="openModal('check', order)">查看</button>
@@ -132,16 +110,16 @@ export default {
             </tbody>
             <tfoot>
                 <tr>
-                    <th scope="col" colspan="7" class="text-start">訂單數量：{{ orderTotal }} 筆</th>
+                    <th scope="col" colspan="6" class="text-start">訂單數量：{{ orderTotal }} 筆</th>
                 </tr>
             </tfoot>
         </table>
-        <PaginationComponent :pagination="orders.pagination" v-if="orders.pagination" @switch-page="getOrders" />
+        <PaginationComponent :pagination="orders.pagination" v-if="orders.pagination?.total_pages" @switch-page="getOrders" />
         <!-- modal 刪除 -->
-        <DelOrderModal ref="childDelOrderModal" :order="currentOrder" @get-orders="getOrders" />
+        <DelOrderModal ref="childDelOrderModal" :order="currentOrder" :page="orders.pagination?.current_page" />
 
         <!-- modal 修改 -->
-        <OrderModal ref="childOrderModal" :order="currentOrder" :handle-create_at="handleCreate_at" @get-orders="getOrders" />
+        <OrderModal ref="childOrderModal" :order="currentOrder" :handle-create_at="handleCreate_at" :page="orders.pagination?.current_page" />
     </div>
 </template>
 

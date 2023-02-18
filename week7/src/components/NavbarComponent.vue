@@ -13,14 +13,14 @@ export default {
                         url: "/"
                     },
                     navLinks: [
-                        {
-                            name: "產品列表",
-                            url: "/products"
-                        },
-                        {
-                            name: "購物車",
-                            url: "/cart"
-                        },
+                        // {
+                        //     name: "產品列表",
+                        //     url: "/products"
+                        // },
+                        // {
+                        //     name: "購物車",
+                        //     url: "/cart"
+                        // },
                         {
                             name: "後台管理",
                             url: "/admin/products"
@@ -40,6 +40,10 @@ export default {
                         {
                             name: "訂單管理",
                             url: "/admin/orders"
+                        },
+                        {
+                            name: "優惠券",
+                            url: "/admin/coupons"
                         }
                     ]
                 }

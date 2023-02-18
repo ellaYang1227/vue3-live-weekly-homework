@@ -1,64 +1,47 @@
 <script>
 import * as bootstrap from "bootstrap";
-const { VITE_API_URL, VITE_API_PATH } = import.meta.env;
+import { mapActions } from "pinia";
+import { OrderStore } from "../stores/OrderStore.js";
+import SwitchIsPaid from "./SwitchIsPaid.vue";
 
 let orderModal = null;
 
 export default {
     data() {
         return {
-            // initCurrentOrder: {},
-            // currentOrder: {},
-            isLoading: false
-            // isInputErr: {},
-            // inputHasErr: false,
-            // isInputChangeValue: false
+            isLoading: false,
+            is_paid: null
         };
     },
     mounted() {
         orderModal = new bootstrap.Modal(document.getElementById("orderModal"), { keyboard: false });
     },
-    computed: {},
-    watch: {},
+    components: {
+        SwitchIsPaid
+    },
+    watch: {
+        order() {
+            this.is_paid = this.order.is_paid;
+        }
+    },
     methods: {
+        ...mapActions(OrderStore, ["editOrder"]),
         openModal() {
             orderModal.show();
         },
-        closeModal(state, message) {
-            this.isLoading = false;
-            orderModal.hide();
-
-            this.$emit("get-orders", this.currentProduct.id ? "" : 1);
-            setTimeout(() => {
-                const title = `更新${state === "success" ? "成功" : "失敗"}`;
-                this.$refs.sweetalert.showSwal("popup", state, title, message);
-            }, 500);
-        },
-        editOrder() {
+        editOrderAPI() {
             this.isLoading = true;
-            this.currentProduct.imagesUrl = Object.values(this.currentProduct.imagesUrl).filter(value => value);
-            const data = { data: this.currentProduct };
-            if (!this.currentProduct.id) {
-                this.$http
-                    .post(`${VITE_API_URL}/api/${VITE_API_PATH}/admin/product`, data)
-                    .then(res => {
-                        this.closeModal("success", res.data.message);
-                    })
-                    .catch(error => {
-                        // console.dir(error);
-                        this.closeModal("error", error.response.data.message);
-                    });
-            } else {
-                this.$http
-                    .put(`${VITE_API_URL}/api/${VITE_API_PATH}/admin/product/${this.currentProduct.id}`, data)
-                    .then(res => {
-                        this.closeModal("success", res.data.message);
-                    })
-                    .catch(error => {
-                        // console.dir(error);
-                        this.closeModal("error", error.response.data.message);
-                    });
-            }
+            this.editOrder(this.order.id, this.is_paid, this.page).then(success => {
+                this.isLoading = false;
+                if (success) {
+                    setTimeout(() => {
+                        orderModal.hide();
+                    }, 1000);
+                }
+            });
+        },
+        setIsPaid(isPaid) {
+            this.is_paid = isPaid;
         }
     },
     props: {
@@ -69,13 +52,16 @@ export default {
         handleCreate_at: {
             type: Function,
             required: true
+        },
+        page: {
+            type: Number,
+            required: true
         }
     }
 };
 </script>
 
 <template>
-    <sweetalert-component ref="sweetalert"></sweetalert-component>
     <div
         class="modal fade"
         tabindex="-1"
@@ -97,9 +83,13 @@ export default {
                                 <li><strong>訂單編號：</strong>{{ order.id }}</li>
                                 <li><strong>訂單時間：</strong>{{ handleCreate_at(order.create_at) }}</li>
                                 <li class="mt-3"><strong>訂購人：</strong>{{ order.user?.name }}</li>
-                                <li><strong>E-Mail</strong>{{ order.user?.email }}</li>
+                                <li><strong>E-Mail： </strong>{{ order.user?.email }}</li>
                                 <li><strong>聯絡電話：</strong>{{ order.user?.tel }}</li>
                                 <li><strong>出貨地址：</strong>{{ order.user?.address }}</li>
+                                <li v-if="order.message">
+                                    <strong>留言：</strong>
+                                    <p class="mb-0">{{ order.message }}</p>
+                                </li>
                             </ul>
                         </li>
                         <li class="list-group-item p-0">
@@ -126,8 +116,9 @@ export default {
                     </ul>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="isLoading">取消</button>
-                    <button type="submit" class="btn btn-primary" :disabled="isLoading" @click="editOrder">
+                    <SwitchIsPaid :order="order" :isLgSize="true" updateMethod="parent" @setIsPaid="setIsPaid" />
+                    <button type="button" class="btn btn-secondary ms-auto" data-bs-dismiss="modal" :disabled="isLoading">取消</button>
+                    <button type="submit" class="btn btn-primary" :disabled="isLoading || is_paid === order.is_paid" @click="editOrderAPI">
                         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" v-if="isLoading"></span>
                         修改
                     </button>

@@ -40,6 +40,10 @@ const routes = [
                 path: "orders",
                 component: () => import("../views/admin/AdminOrdersView.vue")
             },
+            {
+                path: "coupons",
+                component: () => import("../views/admin/AdminCouponsView.vue")
+            },
             { path: ":pathMatch(.*)*", redirect: "/admin/products" }
         ]
     },

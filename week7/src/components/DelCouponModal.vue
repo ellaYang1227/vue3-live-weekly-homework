@@ -1,10 +1,10 @@
 <script>
 import { mapActions } from "pinia";
-import { OrderStore } from "../stores/OrderStore.js";
+import { CouponStore } from "../stores/CouponStore.js";
 import * as bootstrap from "bootstrap";
 const { VITE_API_URL, VITE_API_PATH } = import.meta.env;
 
-let delOrderModal = null;
+let delModal = null;
 
 export default {
     data() {
@@ -13,19 +13,19 @@ export default {
         };
     },
     mounted() {
-        delOrderModal = new bootstrap.Modal(document.getElementById("delOrderModal"), { keyboard: false });
+        delModal = new bootstrap.Modal(document.getElementById("delCouponModal"), { keyboard: false });
     },
     methods: {
-        ...mapActions(OrderStore, ["getOrders"]),
+        ...mapActions(CouponStore, ["getCoupons"]),
         openModal() {
-            delOrderModal.show();
+            delModal.show();
         },
         closeModal(state, message) {
             this.isLoading = false;
-            delOrderModal.hide();
+            delModal.hide();
 
             if (state === "success") {
-                this.getOrders(this.page);
+                this.getCoupons(this.page);
             }
 
             setTimeout(() => {
@@ -33,10 +33,10 @@ export default {
                 this.$refs.sweetalert.showSwal("popup", "error", title, message);
             }, 500);
         },
-        delOrder() {
+        delCoupon() {
             this.isLoading = true;
             this.$http
-                .delete(`${VITE_API_URL}/api/${VITE_API_PATH}/admin/order/${this.order.id}`)
+                .delete(`${VITE_API_URL}/api/${VITE_API_PATH}/admin/coupon/${this.coupon.id}`)
                 .then(res => {
                     this.closeModal("success", res.data.message);
                 })
@@ -47,7 +47,7 @@ export default {
         }
     },
     props: {
-        order: {
+        coupon: {
             type: Object,
             required: true
         },
@@ -64,25 +64,25 @@ export default {
     <div
         class="modal fade"
         tabindex="-1"
-        id="delOrderModal"
-        aria-labelledby="delOrderModalLabel"
+        id="delCouponModal"
+        aria-labelledby="delCouponModalLabel"
         :data-bs-backdrop="isLoading ? true : 'static'"
         aria-hidden="true"
     >
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">刪除訂單</h5>
+                    <h5 class="modal-title">刪除優惠券</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" :disabled="isLoading"></button>
                 </div>
                 <div class="modal-body">
                     <p>
-                        請確認是否<strong>刪除「{{ order?.id }}」訂單</strong>，刪除後您再也無法復原？
+                        請確認是否<strong>刪除「{{ coupon?.title }}」優惠券</strong>，刪除後您再也無法復原？
                     </p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="isLoading">否</button>
-                    <button type="button" class="btn btn-danger" @click="delOrder" :disabled="isLoading">
+                    <button type="button" class="btn btn-danger" @click="delCoupon" :disabled="isLoading">
                         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" v-if="isLoading"></span>
                         是，確認刪除
                     </button>

@@ -114,7 +114,7 @@ export default {
                 </tr>
             </tfoot>
         </table>
-        <PaginationComponent :pagination="products.pagination" v-if="products.pagination" @switch-page="getProducts" />
+        <PaginationComponent :pagination="products.pagination" v-if="products.pagination?.total_pages" @switch-page="getProducts" />
     </div>
     <!-- modal 刪除 -->
     <DelProductModal ref="childDelProductModal" :product="currentProduct" @get-products="getProducts" />

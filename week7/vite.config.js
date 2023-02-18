@@ -16,6 +16,7 @@ export default defineConfig({
         }
     },
     build: {
+        chunkSizeWarningLimit: 5000,
         rollupOptions: {
             output: {
                 // https://github.com/rollup/rollup/blob/master/src/utils/sanitizeFileName.ts

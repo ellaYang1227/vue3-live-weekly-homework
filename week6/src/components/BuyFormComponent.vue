@@ -98,7 +98,7 @@ export default {
                     <Field
                         id="telInput"
                         name="手機號碼"
-                        type="text"
+                        type="tel"
                         class="form-control"
                         :class="{ 'is-invalid': errors['手機號碼'] }"
                         placeholder="請輸入手機號碼"

@@ -9,7 +9,7 @@ export default {
             data: {
                 front: {
                     brand: {
-                        name: "week6 作業",
+                        name: "week7 作業",
                         url: "/"
                     },
                     navLinks: [
@@ -29,7 +29,7 @@ export default {
                 },
                 admin: {
                     brand: {
-                        name: "[後台管理] week6 作業",
+                        name: "[後台管理] week7 作業",
                         url: "/admin/products"
                     },
                     navLinks: [

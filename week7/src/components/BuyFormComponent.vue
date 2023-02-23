@@ -16,7 +16,7 @@ export default {
         };
     },
     components: {
-        Form,
+        VForm: Form,
         Field,
         ErrorMessage
     },
@@ -62,7 +62,7 @@ export default {
 
 <template>
     <sweetalert-component ref="sweetalert"></sweetalert-component>
-    <Form v-slot="{ errors }" @submit="onSubmitOrder">
+    <v-form v-slot="{ errors }" @submit="onSubmitOrder">
         <fieldset :disabled="isLoadingBtn">
             <div class="row gy-4">
                 <div class="col-md-6">
@@ -131,5 +131,5 @@ export default {
                 送出訂單
             </button>
         </fieldset>
-    </Form>
+    </v-form>
 </template>

@@ -116,10 +116,22 @@ export default {
         </table>
         <PaginationComponent :pagination="orders.pagination" v-if="orders.pagination?.total_pages" @switch-page="getOrders" />
         <!-- modal 刪除 -->
-        <DelOrderModal ref="childDelOrderModal" :order="currentOrder" :page="orders.pagination?.current_page" />
+        {{ orders.pagination?.current_page }}
+        <DelOrderModal
+            ref="childDelOrderModal"
+            :order="currentOrder"
+            :page="orders.pagination?.current_page"
+            v-if="orders.pagination?.current_page"
+        />
 
         <!-- modal 修改 -->
-        <OrderModal ref="childOrderModal" :order="currentOrder" :handle-create_at="handleCreate_at" :page="orders.pagination?.current_page" />
+        <OrderModal
+            ref="childOrderModal"
+            :order="currentOrder"
+            :handle-create_at="handleCreate_at"
+            :page="orders.pagination?.current_page"
+            v-if="orders.pagination?.current_page"
+        />
     </div>
 </template>
 

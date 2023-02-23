@@ -104,7 +104,7 @@ export default {
     props: {
         imageUrl: {
             type: String,
-            required: true
+            required: false
         },
         dataKey: {
             type: String,
@@ -114,7 +114,8 @@ export default {
             type: Boolean,
             default: false
         }
-    }
+    },
+    emits: ["update-image"]
 };
 </script>
 

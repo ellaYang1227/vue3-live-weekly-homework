@@ -189,7 +189,8 @@ export default {
             type: Object,
             required: false
         }
-    }
+    },
+    emits: ["get-products"]
 };
 </script>
 

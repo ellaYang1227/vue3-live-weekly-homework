@@ -26,9 +26,10 @@ export default {
         },
         page: {
             type: Number,
-            required: true
+            required: false
         }
     },
+    emits: ["set-is-paid"],
     mounted() {
         this.switchIsPaid = this.order.is_paid;
     },

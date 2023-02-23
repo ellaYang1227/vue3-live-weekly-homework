@@ -28,7 +28,7 @@ export default {
         this.hideLoading();
     },
     components: {
-        Form,
+        VForm: Form,
         Field,
         ErrorMessage
     },
@@ -73,7 +73,7 @@ export default {
                 <div class="card">
                     <div class="card-body py-4">
                         <h5 class="card-title h4 mb-3 text-muted">{{ title }}</h5>
-                        <Form v-slot="{ errors }" @submit="signin">
+                        <v-form v-slot="{ errors }" @submit="signin">
                             <div class="mb-3">
                                 <label for="emailInput" class="form-label">Email<span class="text-danger">*</span></label>
                                 <Field
@@ -104,7 +104,7 @@ export default {
                                 <div class="invalid-feedback d-block text-muted" v-if="!errors['密碼']">密碼需至少 8 碼以上，並英數混合</div>
                             </div>
                             <button type="submit" class="btn btn-primary w-100 mt-3">{{ title }}</button>
-                        </Form>
+                        </v-form>
                     </div>
                 </div>
             </div>
